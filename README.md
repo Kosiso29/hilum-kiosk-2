@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🚀 Next.js PWA App
 
-## Getting Started
+This is a Progressive Web App (PWA) built with **Next.js**, designed to be installable from the browser with offline support and fast performance.
 
-First, run the development server:
+## 📦 Features
+
+- Fully functional Next.js PWA
+- Browser-installable (via the install icon in the address bar)
+- Ready for deployment
+- Sample page included for demonstration
+
+---
+
+## 🛠️ Getting Started
+
+### 1. Clone the Repository
+
+```bash
+git clone git@github.com:Wosler-Corp/hilum-kiosk.git
+cd hilum-kiosk
+```
+
+### 2. Install Dependencies
+
+Make sure you have [Node.js](https://nodejs.org/) installed (preferably version 18 or later), then run:
+
+```bash
+npm install
+```
+
+### 3. Run the Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The app will be running at: [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📦 Build for Production
 
-## Learn More
+To generate a production build:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run build
+npm run start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📲 Installing the App from Your Browser (You need to run in production in order to do this)
 
-## Deploy on Vercel
+Once the app is running in the browser (or deployed to a live URL), you can install it as a PWA:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Open the app in **Google Chrome** (or any PWA-supported browser).
+2. Look for the **install icon** in the address bar.  
+   - In Chrome, this icon may appear as a **screen with a download arrow**.
+3. Click the install icon and follow the prompts.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+After installation, the app will open in its own window like a native application.
+
