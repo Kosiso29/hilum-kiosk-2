@@ -16,6 +16,7 @@ export interface Booking {
     };
     externalBooking?: {
         externalBookingReference: string;
+        mrn?: string;
     };
     startTimeStamp: string;
     endTimeStamp: string;

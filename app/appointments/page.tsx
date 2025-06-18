@@ -63,17 +63,40 @@ function AppointmentsContent() {
         searchBookings();
     }, [firstName, lastName, birthDate, phoneNumber, healthCard, bookingReference]);
 
-    const handleCheckInClick = (booking: Booking) => {
-        // Navigate to the success page with appointment details
-        const params = new URLSearchParams({
-            service: booking.service.service,
-            start: booking.startTimeStamp,
-            end: booking.endTimeStamp,
-            clinic: booking.room.clinic.name,
-            reference: booking.bookingReference,
-            operator: booking.operator?.name || '',
-        });
-        router.push(`/appointments/success?${params.toString()}`);
+    const handleCheckInClick = async (booking: Booking) => {
+        setError(null);
+        const velox_id = booking.externalBooking?.externalBookingReference;
+        const mrn = booking.externalBooking?.mrn || "910";
+        if (!velox_id) {
+            setError("Unable to check in: missing external booking reference.");
+            return;
+        }
+        try {
+            const response = await fetch(`http://15.157.121.170/appointment/check-in/${velox_id}/${mrn}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ referring_doctor: 'test test' }),
+            });
+            if (!response.ok) {
+                setError("Check-in failed. Please try again or contact the front desk.");
+                console.log('response', response);
+                return;
+            }
+            // Navigate to the success page with appointment details
+            const params = new URLSearchParams({
+                service: booking.service.service,
+                start: booking.startTimeStamp,
+                end: booking.endTimeStamp,
+                clinic: booking.room.clinic.name,
+                reference: booking.bookingReference,
+                operator: booking.operator?.name || '',
+            });
+            router.push(`/appointments/success?${params.toString()}`);
+        } catch {
+            setError("There was an error with the check-in");
+        }
     };
 
     const handleNeedHelpClick = () => {
