@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '@/app/components/Header';
 
-export default function VerifyIdentityPage() {
+function VerifyIdentityContent() {
     const [dateOfBirth, setDateOfBirth] = useState('');
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const router = useRouter();
@@ -96,5 +96,20 @@ export default function VerifyIdentityPage() {
                 </div>
             </main>
         </div>
+    );
+}
+
+export default function VerifyIdentityPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-white text-gray-900 flex flex-col items-center p-8">
+                <Header />
+                <main className="flex flex-col items-center text-center flex-grow">
+                    <div className="text-2xl text-gray-600">Loading...</div>
+                </main>
+            </div>
+        }>
+            <VerifyIdentityContent />
+        </Suspense>
     );
 } 

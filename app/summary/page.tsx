@@ -1,9 +1,10 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '@/app/components/Header';
 
-export default function SummaryPage() {
+function SummaryContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -62,5 +63,20 @@ export default function SummaryPage() {
                 </div>
             </main>
         </div>
+    );
+}
+
+export default function SummaryPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-white text-gray-900 flex flex-col items-center p-8">
+                <Header />
+                <main className="flex flex-col items-center text-center flex-grow">
+                    <div className="text-2xl text-gray-600">Loading...</div>
+                </main>
+            </div>
+        }>
+            <SummaryContent />
+        </Suspense>
     );
 } 

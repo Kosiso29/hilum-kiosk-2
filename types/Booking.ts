@@ -12,11 +12,19 @@ export interface Booking {
         lastName: string;
         phoneNumber: string;
         birthDate: string;
-        Healthcard: string;
+        Healthcard?: string;
+    };
+    externalBooking?: {
+        externalBookingReference: string;
     };
     startTimeStamp: string;
     endTimeStamp: string;
-    service: { service: string };
+    service: {
+        service: string;
+        type?: {
+            type: string;
+        };
+    };
     operator: { name: string };
     bookingReference: string;
 } 

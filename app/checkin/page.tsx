@@ -22,9 +22,21 @@ export default function CheckinPage() {
         }
 
         try {
-            const response = await fetch('/api/bookings');
+            const response = await fetch(`/api/bookings?bookingReference=${referenceCode}`);
+
+            if (!response.ok) {
+                if (response.status === 404) {
+                    setErrorMessage('Sorry, we cannot find the booking reference. We can get the booking using your other personal details');
+                } else {
+                    setErrorMessage('Failed to fetch booking data. Please try again later.');
+                }
+                return;
+            }
+
             const bookings: Booking[] = await response.json();
-            const foundBooking = bookings.find((booking: Booking) => booking.bookingReference === referenceCode);
+
+            // The API returns an array, so we take the first booking
+            const foundBooking = bookings[0];
 
             if (foundBooking) {
                 // Pass the found booking details to the verification page
