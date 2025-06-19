@@ -12,6 +12,9 @@ function AppointmentsContent() {
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [loadingCheckInId, setLoadingCheckInId] = useState<number | null>(null);
+    const [checkInError, setCheckInError] = useState<{ [id: number]: string }>({});
+    const [selected, setSelected] = useState<number[]>([]);
 
     const firstName = searchParams.get('firstName');
     const lastName = searchParams.get('lastName');
@@ -63,12 +66,32 @@ function AppointmentsContent() {
         searchBookings();
     }, [firstName, lastName, birthDate, phoneNumber, healthCard, bookingReference]);
 
-    const handleCheckInClick = async (booking: Booking) => {
+    const handleSelect = (id: number, disabled: boolean) => {
+        if (disabled) return;
+        setSelected((prev) => {
+            if (prev.includes(id)) {
+                return prev.filter((x) => x !== id);
+            } else if (prev.length < 2) {
+                return [...prev, id];
+            } else {
+                return prev;
+            }
+        });
+    };
+
+    const handleNext = async () => {
+        if (selected.length === 0) return;
+        // For now, only check in the first selected appointment (can be extended to multiple)
+        const booking = bookings.find((b) => selected.includes(b.id));
+        if (!booking) return;
         setError(null);
+        setCheckInError((prev) => ({ ...prev, [booking.id]: '' }));
+        setLoadingCheckInId(booking.id);
         const velox_id = booking.externalBooking?.externalBookingReference;
         const mrn = booking.externalBooking?.mrn || "910";
         if (!velox_id) {
             setError("Unable to check in: missing external booking reference.");
+            setLoadingCheckInId(null);
             return;
         }
         try {
@@ -81,7 +104,7 @@ function AppointmentsContent() {
             });
             if (!response.ok) {
                 setError("Check-in failed. Please try again or contact the front desk.");
-                console.log('response', response);
+                setLoadingCheckInId(null);
                 return;
             }
             // Navigate to the success page with appointment details
@@ -94,18 +117,17 @@ function AppointmentsContent() {
                 operator: booking.operator?.name || '',
             });
             router.push(`/appointments/success?${params.toString()}`);
-        } catch {
-            setError("There was an error with the check-in");
+        } catch (error) {
+            let message = 'There was an error with the check-in';
+            if (error instanceof Error) message = error.message;
+            setCheckInError((prev) => ({ ...prev, [booking.id]: message }));
+            setLoadingCheckInId(null);
         }
     };
 
     const handleNeedHelpClick = () => {
         // Logic for help
         console.log("Need help clicked");
-    };
-
-    const handleBackClick = () => {
-        router.back();
     };
 
     return (
@@ -127,30 +149,42 @@ function AppointmentsContent() {
 
                 {!loading && !error && bookings.length > 0 && (
                     <div className="flex flex-col items-center w-full">
-                        {bookings.map((booking) => (
-                            <AppointmentCard
-                                key={booking.id}
-                                service={booking.service.service}
-                                time={`${new Date(booking.startTimeStamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(booking.endTimeStamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
-                                disabled={new Date(booking.endTimeStamp) < new Date()}
-                                onCheckIn={() => handleCheckInClick(booking)}
-                            />
-                        ))}
+                        {bookings.map((booking) => {
+                            const past = new Date(booking.endTimeStamp) < new Date();
+                            const isSelected = selected.includes(booking.id);
+                            return (
+                                <AppointmentCard
+                                    key={booking.id}
+                                    service={booking.service.service}
+                                    time={`${new Date(booking.startTimeStamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(booking.endTimeStamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
+                                    disabled={past || loadingCheckInId !== null}
+                                    loading={loadingCheckInId === booking.id}
+                                    error={checkInError[booking.id]}
+                                    selected={isSelected}
+                                    onCheckIn={() => handleSelect(booking.id, past || loadingCheckInId !== null)}
+                                />
+                            );
+                        })}
                     </div>
                 )}
 
                 {/* Buttons */}
-                <div className="flex space-x-8 mt-auto">
+                <div className="flex justify-between w-full max-w-2xl mt-12">
                     <button
-                        className="px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full text-2xl font-semibold"
-                        onClick={handleBackClick}
-                    >
-                        Back
-                    </button>
-                    <button className="px-12 py-4 border-2 border-purple-500 text-purple-600 rounded-full text-2xl font-semibold"
+                        className="px-12 py-4 border-2 border-purple-500 text-purple-600 rounded-full text-2xl font-semibold mr-4"
                         onClick={handleNeedHelpClick}
                     >
                         Need help?
+                    </button>
+                    <button
+                        className={`px-12 py-4 bg-gradient-to-r from-purple-600 to-pink-500 text-white rounded-full text-2xl font-semibold flex items-center transition-all ${selected.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        disabled={selected.length === 0 || loadingCheckInId !== null}
+                        onClick={handleNext}
+                    >
+                        Next
+                        <svg className="ml-2 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
                     </button>
                 </div>
             </main>

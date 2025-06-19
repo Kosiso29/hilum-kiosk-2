@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 export default function Header() {
     const [currentTime, setCurrentTime] = useState('');
     const [currentDate, setCurrentDate] = useState('');
+    const router = useRouter();
 
     useEffect(() => {
         const updateDateTime = () => {
@@ -31,7 +33,11 @@ export default function Header() {
                     {currentDate.split(',')[1]}
                 </div>
             </div>
-            <div className="flex items-center">
+            <div
+                className="flex items-center cursor-pointer select-none"
+                onClick={() => router.push('/')}
+                title="Go to Home"
+            >
                 <Image src="/icons/icon-192x192.png" alt="Wosler Diagnostics Logo" width={80} height={80} className="mr-4" />
                 <span className="text-3xl font-bold">Wosler</span>
                 <span className="text-xl font-normal ml-1">DIAGNOSTICS</span>
