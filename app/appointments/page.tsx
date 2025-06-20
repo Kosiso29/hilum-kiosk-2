@@ -84,50 +84,52 @@ function AppointmentsContent() {
 
     const handleNext = async () => {
         if (selected.length === 0) return;
-        // For now, only check in the first selected appointment (can be extended to multiple)
-        const booking = bookings.find((b) => selected.includes(b.id));
-        if (!booking) return;
         setError(null);
-        setCheckInError((prev) => ({ ...prev, [booking.id]: '' }));
-        setLoadingCheckInId(booking.id);
-        // TODO: Get the right api and implement this
-        // const velox_id = booking.externalBooking?.externalBookingReference;
-        // const mrn = booking.externalBooking?.mrn || "910";
-        // if (!velox_id) {
-        //     setError("Unable to check in: missing external booking reference.");
-        //     setLoadingCheckInId(null);
-        //     return;
-        // }
-        try {
-            // TODO: Get the right api and implement this
-            // const response = await fetch(`http://15.157.121.170/appointment/check-in/${velox_id}/${mrn}`, {
-            //     method: 'PUT',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //     },
-            //     body: JSON.stringify({ referring_doctor: 'test test' }),
-            // });
-            const response = { ok: true }
-            if (!response.ok) {
-                setError("Check-in failed. Please try again or contact the front desk.");
+        let allSucceeded = true;
+        let lastSuccessBooking = null;
+        for (const id of selected) {
+            const booking = bookings.find((b) => b.id === id);
+            if (!booking) continue;
+            setLoadingCheckInId(booking.id);
+            // TODO: implement when the telelink api is available
+            // const velox_id = booking.externalBooking?.externalBookingReference;
+            // const mrn = booking.externalBooking?.mrn || "910";
+            // if (!velox_id) {
+            //     setCheckInError((prev) => ({ ...prev, [booking.id]: "Unable to check in: missing external booking reference." }));
+            //     allSucceeded = false;
+            //     continue;
+            // }
+            try {
+                // TODO: implement when the telelink api is available
+                // await import('axios').then(({ default: axios }) =>
+                //     axios.put(`http://15.157.121.170/appointment/check-in/${velox_id}/${mrn}`, { referring_doctor: 'test test' })
+                // );
+                // simulate api call
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                lastSuccessBooking = booking;
+                // Clear error if check-in succeeds
+                setCheckInError((prev) => ({ ...prev, [booking.id]: '' }));
+            } catch (error) {
+                let message = 'There was an error with the check-in';
+                if (error instanceof Error) message = error.message;
+                setCheckInError((prev) => ({ ...prev, [booking.id]: message }));
+                allSucceeded = false;
+            } finally {
                 setLoadingCheckInId(null);
-                return;
             }
-            // Navigate to the success page with appointment details
+        }
+        if (allSucceeded && lastSuccessBooking) {
             const params = new URLSearchParams({
-                service: booking.service.service,
-                start: booking.startTimeStamp,
-                end: booking.endTimeStamp,
-                clinic: booking.room.clinic.name,
-                reference: booking.bookingReference,
-                operator: booking.operator?.name || '',
+                service: lastSuccessBooking.service.service,
+                start: lastSuccessBooking.startTimeStamp,
+                end: lastSuccessBooking.endTimeStamp,
+                clinic: lastSuccessBooking.room.clinic.name,
+                reference: lastSuccessBooking.bookingReference,
+                operator: lastSuccessBooking.operator?.name || '',
             });
             router.push(`/appointments/success?${params.toString()}`);
-        } catch (error) {
-            let message = 'There was an error with the check-in';
-            if (error instanceof Error) message = error.message;
-            setCheckInError((prev) => ({ ...prev, [booking.id]: message }));
-            setLoadingCheckInId(null);
+        } else if (!allSucceeded) {
+            setError('Some check-ins failed. Please review the errors above.');
         }
     };
 
@@ -149,19 +151,7 @@ function AppointmentsContent() {
                     <div className="text-2xl text-gray-600 mb-8">Searching for your appointments...</div>
                 )}
 
-                {error && (
-                    <>
-                        <div className="text-red-500 text-xl mb-8">{error}</div>
-                        <button
-                            className="px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full text-2xl font-semibold mb-8"
-                            onClick={() => router.push('/personal-details')}
-                        >
-                            Back
-                        </button>
-                    </>
-                )}
-
-                {!loading && !error && bookings.length > 0 && (
+                {!loading && bookings.length > 0 && (
                     <div className="flex flex-col items-center w-full">
                         {bookings.map((booking) => {
                             const past = new Date(booking.endTimeStamp) < new Date();
@@ -182,8 +172,20 @@ function AppointmentsContent() {
                     </div>
                 )}
 
+                {error && (
+                    <div className="text-red-500 text-xl mb-8">{error}</div>
+                )}
+
                 {/* Buttons */}
                 <div className="flex justify-between w-full max-w-2xl mt-12">
+                    {error && (
+                        <button
+                            className="px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full text-2xl font-semibold"
+                            onClick={() => router.push('/personal-details')}
+                        >
+                            Back
+                        </button>
+                    )}
                     <button
                         className="px-12 py-4 border-2 border-purple-500 text-purple-600 rounded-full text-2xl font-semibold mr-4"
                         onClick={handleNeedHelpClick}
