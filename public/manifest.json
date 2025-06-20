@@ -3,7 +3,8 @@
     "short_name": "Hilum",
     "description": "Hilum Kiosk Application",
     "start_url": "/",
-    "display": "standalone",
+    "display": "fullscreen",
+    "orientation": "portrait",
     "background_color": "#ffffff",
     "theme_color": "#000000",
     "icons": [
