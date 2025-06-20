@@ -69,8 +69,16 @@ function AppointmentsContent() {
         searchBookings();
     }, [firstName, lastName, birthDate, phoneNumber, healthCard, bookingReference]);
 
-    const handleSelect = (id: number, disabled: boolean) => {
+    const handleSelect = (id: number, disabled: boolean, canCheckIn?: boolean) => {
         if (disabled) return;
+        if (canCheckIn === false) {
+            setCheckInError((prev) => ({
+                ...prev,
+                [id]: 'You can only check in within 30 minutes before and up to 10 minutes after your appointment.'
+            }));
+            return;
+        }
+        setCheckInError((prev) => ({ ...prev, [id]: '' }));
         setSelected((prev) => {
             if (prev.includes(id)) {
                 return prev.filter((x) => x !== id);
@@ -144,28 +152,49 @@ function AppointmentsContent() {
 
             {/* Main Content */}
             <main className="flex flex-col items-center text-center flex-grow w-full">
-                <h1 className="text-6xl font-bold mb-4">Appointments</h1>
-                <p className="text-3xl text-gray-600 mb-20">Please confirm your details</p>
+                {/* Patient Name and Instructions */}
+                <div className="w-full flex flex-col items-center mb-12">
+                    <h2 className="text-4xl font-semibold text-gray-300 mb-2">{firstName ? `${firstName}'s Appointments` : 'Appointments'}</h2>
+                    <div className="text-xl text-gray-500 mb-1">
+                        Tap the <span className="text-purple-500 font-semibold">“Check in”</span> to select appointments
+                    </div>
+                    <div className="text-base text-gray-400">( Select no more than 2 items )</div>
+                </div>
 
                 {loading && (
-                    <div className="text-2xl text-gray-600 mb-8">Searching for your appointments...</div>
+                    <div className="flex items-center justify-center text-2xl text-gray-600 mb-8 gap-4">
+                        <span>Searching for your appointments </span>
+                        <svg className="animate-spin h-7 w-7 text-purple-500 mr-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                        </svg>
+                    </div>
                 )}
 
                 {!loading && bookings.length > 0 && (
                     <div className="flex flex-col items-center w-full">
                         {bookings.map((booking) => {
-                            const past = new Date(booking.endTimeStamp) < new Date();
+                            const now = new Date();
+                            const start = new Date(booking.startTimeStamp);
+                            const end = new Date(booking.endTimeStamp);
+                            const diffToStart = (start.getTime() - now.getTime()) / 60000; // minutes until start
+                            const diffFromStart = (now.getTime() - start.getTime()) / 60000; // minutes after start
+                            const canCheckIn =
+                                diffToStart <= 30 && // within 30 min before
+                                diffFromStart <= 10 && // not more than 10 min late
+                                diffToStart <= 30 && diffToStart >= -10; // between -10 and 30 min
+                            const past = end < now;
                             const isSelected = selected.includes(booking.id);
                             return (
                                 <AppointmentCard
                                     key={booking.id}
                                     service={booking.service.service}
-                                    time={`${new Date(booking.startTimeStamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(booking.endTimeStamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
-                                    disabled={past || loadingCheckInId !== null}
+                                    time={`${start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
+                                    disabled={past || loadingCheckInId !== null || !canCheckIn}
                                     loading={loadingCheckInId === booking.id}
                                     error={checkInError[booking.id]}
                                     selected={isSelected}
-                                    onCheckIn={() => handleSelect(booking.id, past || loadingCheckInId !== null)}
+                                    onCheckIn={() => canCheckIn && !past && !loadingCheckInId ? handleSelect(booking.id, false, true) : undefined}
                                 />
                             );
                         })}
