@@ -9,6 +9,7 @@ export default function PersonalDetailsPage() {
     const [lastName, setLastName] = useState('');
     const [dateOfBirth, setDateOfBirth] = useState('');
     const [healthcareNumber, setHealthcareNumber] = useState('');
+    const [error, setError] = useState<string | null>(null);
     const router = useRouter();
 
     const handleBackClick = () => {
@@ -16,28 +17,26 @@ export default function PersonalDetailsPage() {
     };
 
     const handleNextClick = () => {
-        if (firstName && lastName && dateOfBirth) {
-            const query = new URLSearchParams({
-                firstName,
-                lastName,
-                birthDate: dateOfBirth,
-                ...(healthcareNumber && { healthCard: healthcareNumber }),
-            }).toString();
-            router.push(`/appointments?${query}`);
-        } else {
-            alert('Please fill in all required fields (First Name, Last Name, Date of Birth).');
+        if (!firstName || !lastName || !dateOfBirth) {
+            setError('Please fill in all required fields (First Name, Last Name, Date of Birth).');
+            return;
         }
+        setError(null);
+        const query = new URLSearchParams({
+            firstName,
+            lastName,
+            birthDate: dateOfBirth,
+            ...(healthcareNumber && { healthCard: healthcareNumber }),
+        }).toString();
+        router.push(`/appointments?${query}`);
     };
 
     return (
         <div className="min-h-screen bg-white text-gray-900 flex flex-col items-center p-8">
             <Header />
-
-            {/* Main Content */}
             <main className="flex flex-col items-center text-center flex-grow">
                 <h1 className="text-6xl font-bold mb-4">Check-In</h1>
                 <p className="text-3xl text-gray-600 mb-20">Enter personal details</p>
-
                 <div className="bg-gray-100 rounded-3xl shadow-xl p-12 w-3/5 flex flex-col items-start mb-12">
                     <h2 className="text-4xl font-semibold mb-8">Personal Details</h2>
                     <div className="grid grid-cols-2 gap-10 w-full mb-8">
@@ -92,8 +91,9 @@ export default function PersonalDetailsPage() {
                         Please enter all sections with a with the asterisk character <span className="font-bold">&quot;*&quot;</span>
                     </p>
                 </div>
-
-                {/* Buttons */}
+                {error && (
+                    <div className="text-red-500 text-xl mb-8">{error}</div>
+                )}
                 <div className="flex space-x-8 mt-auto">
                     <button
                         className="px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full text-2xl font-semibold"

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Booking } from '@/types/Booking';
 import Header from '@/app/components/Header';
+import api from '../lib/axios';
 
 export default function CheckinPage() {
     const [referenceCode, setReferenceCode] = useState('');
@@ -22,18 +23,19 @@ export default function CheckinPage() {
         }
 
         try {
-            const response = await fetch(`/api/bookings?bookingReference=${referenceCode}`);
+            const params = new URLSearchParams({
+                bookingReference: referenceCode,
+                nexusNumber: '6473603374'
+            });
 
-            if (!response.ok) {
-                if (response.status === 404) {
-                    setErrorMessage('Sorry, we cannot find the booking reference. We can get the booking using your other personal details');
-                } else {
-                    setErrorMessage('Failed to fetch booking data. Please try again later.');
-                }
+            const response = await api.get(`slots/booking?${params}`);
+
+            if (!response.data || response.data.length === 0) {
+                setErrorMessage('Sorry, we cannot find the booking reference. We can get the booking using your other personal details');
                 return;
             }
 
-            const bookings: Booking[] = await response.json();
+            const bookings: Booking[] = response.data;
 
             // The API returns an array, so we take the first booking
             const foundBooking = bookings[0];

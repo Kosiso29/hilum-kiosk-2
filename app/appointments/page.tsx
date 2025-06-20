@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Booking } from '@/types/Booking';
 import Header from '@/app/components/Header';
 import AppointmentCard from '../components/AppointmentCard';
+import api from '../lib/axios';
 
 function AppointmentsContent() {
     const router = useRouter();
@@ -28,34 +29,36 @@ function AppointmentsContent() {
             setLoading(true);
             setError(null);
             try {
-                let params;
+                let response;
+
                 if (bookingReference && birthDate) {
-                    // Only use bookingReference and birthDate
-                    params = new URLSearchParams({
+                    // Call external API for bookingReference
+                    const params = new URLSearchParams({
                         bookingReference,
-                        birthDate,
+                        nexusNumber: '6473603374'
                     });
+                    response = await api.get(`slots/booking?${params}`);
                 } else if (firstName && lastName && birthDate) {
-                    // Use personal details
-                    params = new URLSearchParams({
+                    // Call external API for personal details
+                    const params = new URLSearchParams({
                         firstName,
                         lastName,
-                        birthDate,
-                        ...(phoneNumber && { phoneNumber }),
-                        ...(healthCard && { healthCard }),
+                        patientDOB: birthDate,
+                        nexusNumber: '6473603374'
                     });
+                    response = await api.get(`slots/booking?${params}`);
                 } else {
                     setLoading(false);
                     return;
                 }
-                const response = await fetch(`/api/bookings?${params}`);
-                if (!response.ok) {
+
+                if (!response.data || response.data.length === 0) {
                     setError('No bookings found for the provided details.');
                     setLoading(false);
                     return;
                 }
-                const bookingData: Booking[] = await response.json();
-                setBookings(bookingData);
+
+                setBookings(response.data);
             } catch (error) {
                 console.error('Error searching bookings:', error);
                 setError('Failed to search for bookings. Please try again.');
@@ -87,21 +90,24 @@ function AppointmentsContent() {
         setError(null);
         setCheckInError((prev) => ({ ...prev, [booking.id]: '' }));
         setLoadingCheckInId(booking.id);
-        const velox_id = booking.externalBooking?.externalBookingReference;
-        const mrn = booking.externalBooking?.mrn || "910";
-        if (!velox_id) {
-            setError("Unable to check in: missing external booking reference.");
-            setLoadingCheckInId(null);
-            return;
-        }
+        // TODO: Get the right api and implement this
+        // const velox_id = booking.externalBooking?.externalBookingReference;
+        // const mrn = booking.externalBooking?.mrn || "910";
+        // if (!velox_id) {
+        //     setError("Unable to check in: missing external booking reference.");
+        //     setLoadingCheckInId(null);
+        //     return;
+        // }
         try {
-            const response = await fetch(`http://15.157.121.170/appointment/check-in/${velox_id}/${mrn}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ referring_doctor: 'test test' }),
-            });
+            // TODO: Get the right api and implement this
+            // const response = await fetch(`http://15.157.121.170/appointment/check-in/${velox_id}/${mrn}`, {
+            //     method: 'PUT',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //     },
+            //     body: JSON.stringify({ referring_doctor: 'test test' }),
+            // });
+            const response = { ok: true }
             if (!response.ok) {
                 setError("Check-in failed. Please try again or contact the front desk.");
                 setLoadingCheckInId(null);
@@ -144,7 +150,15 @@ function AppointmentsContent() {
                 )}
 
                 {error && (
-                    <div className="text-red-500 text-xl mb-8">{error}</div>
+                    <>
+                        <div className="text-red-500 text-xl mb-8">{error}</div>
+                        <button
+                            className="px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full text-2xl font-semibold mb-8"
+                            onClick={() => router.push('/personal-details')}
+                        >
+                            Back
+                        </button>
+                    </>
                 )}
 
                 {!loading && !error && bookings.length > 0 && (
