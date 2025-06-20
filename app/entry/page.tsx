@@ -27,7 +27,7 @@ export default function CheckinPage() {
                 <div className="flex flex-col md:flex-row md:space-x-12 space-y-8 md:space-y-0 mb-8 md:mb-20 w-full items-center justify-center">
                     {/* Check-In Card */}
                     <div
-                        className="bg-gray-100 rounded-3xl shadow-xl w-72 h-72 md:w-96 md:h-96 flex flex-col items-center justify-center p-4 md:p-8 cursor-pointer transform transition-transform duration-200 hover:scale-105"
+                        className="bg-gray-100 rounded-3xl w-72 h-72 md:w-96 md:h-96 flex flex-col items-center justify-center p-4 md:p-8 cursor-pointer transform transition-transform duration-200 hover:scale-105"
                         onClick={handleCheckinClick}
                     >
                         <div className="w-40 h-28 md:w-64 md:h-48 bg-gray-200 rounded-xl mb-4 md:mb-6"></div> {/* Placeholder for image/icon */}
@@ -37,7 +37,7 @@ export default function CheckinPage() {
 
                     {/* Walk-In Card */}
                     <div
-                        className="bg-gray-100 rounded-3xl shadow-xl w-72 h-72 md:w-96 md:h-96 flex flex-col items-center justify-center p-4 md:p-8 cursor-pointer transform transition-transform duration-200 hover:scale-105"
+                        className="bg-gray-100 rounded-3xl w-72 h-72 md:w-96 md:h-96 flex flex-col items-center justify-center p-4 md:p-8 cursor-pointer transform transition-transform duration-200 hover:scale-105"
                         onClick={handleWalkinClick}
                     >
                         <div className="w-40 h-28 md:w-64 md:h-48 bg-gray-200 rounded-xl mb-4 md:mb-6"></div> {/* Placeholder for image/icon */}
@@ -52,20 +52,20 @@ export default function CheckinPage() {
                     <br />
                     Late check-ins by more than 10 minutes are not permitted.
                 </p>
-
-                {/* Buttons */}
-                <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-8 w-full items-center justify-center">
-                    <button className="px-8 md:px-12 py-4 border-2 border-purple-500 text-purple-600 rounded-full text-lg md:text-2xl font-semibold">
-                        Need help?
-                    </button>
-                    <button className="px-8 md:px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full text-lg md:text-2xl font-semibold flex items-center">
-                        Next
-                        <svg className="ml-2 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-                        </svg>
-                    </button>
-                </div>
             </main>
+
+            {/* Sticky footer button group */}
+            <div className="w-full bg-white flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-8 items-center justify-center py-4">
+                <button className="px-8 md:px-12 py-4 border-2 border-purple-500 text-purple-600 rounded-full text-lg md:text-2xl font-semibold">
+                    Need help?
+                </button>
+                <button className="px-8 md:px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full text-lg md:text-2xl font-semibold flex items-center">
+                    Next
+                    <svg className="ml-2 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+            </div>
         </div>
     );
 } 

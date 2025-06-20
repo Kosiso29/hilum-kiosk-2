@@ -37,7 +37,7 @@ export default function PersonalDetailsPage() {
             <main className="flex flex-col items-center text-center flex-grow">
                 <h1 className="text-6xl font-bold mb-4">Check-In</h1>
                 <p className="text-3xl text-gray-600 mb-20">Enter personal details</p>
-                <div className="bg-gray-100 rounded-3xl shadow-xl p-12 w-3/5 flex flex-col items-start mb-12">
+                <div className="bg-gray-100 p-12 w-3/5 flex flex-col items-start mb-12">
                     <h2 className="text-4xl font-semibold mb-8">Personal Details</h2>
                     <div className="grid grid-cols-2 gap-10 w-full mb-8">
                         <div>
@@ -94,27 +94,28 @@ export default function PersonalDetailsPage() {
                 {error && (
                     <div className="text-red-500 text-xl mb-8">{error}</div>
                 )}
-                <div className="flex space-x-8 mt-auto">
-                    <button
-                        className="px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full text-2xl font-semibold"
-                        onClick={handleBackClick}
-                    >
-                        Back
-                    </button>
-                    <button className="px-12 py-4 border-2 border-purple-500 text-purple-600 rounded-full text-2xl font-semibold">
-                        Need help?
-                    </button>
-                    <button
-                        className="px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full text-2xl font-semibold flex items-center"
-                        onClick={handleNextClick}
-                    >
-                        Next
-                        <svg className="ml-2 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-                        </svg>
-                    </button>
-                </div>
             </main>
+            {/* Sticky footer button group */}
+            <div className="w-full bg-white flex space-x-8 items-center justify-center py-4">
+                <button
+                    className="px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full text-2xl font-semibold"
+                    onClick={handleBackClick}
+                >
+                    Back
+                </button>
+                <button className="px-12 py-4 border-2 border-purple-500 text-purple-600 rounded-full text-2xl font-semibold">
+                    Need help?
+                </button>
+                <button
+                    className="px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full text-2xl font-semibold flex items-center"
+                    onClick={handleNextClick}
+                >
+                    Next
+                    <svg className="ml-2 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+            </div>
         </div>
     );
 } 

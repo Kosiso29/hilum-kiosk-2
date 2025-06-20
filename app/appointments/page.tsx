@@ -206,35 +206,35 @@ function AppointmentsContent() {
                 {error && (
                     <div className="text-red-500 text-xl mb-8">{error}</div>
                 )}
-
-                {/* Buttons */}
-                <div className="flex justify-between w-full max-w-2xl mt-12">
-                    {error && (
-                        <button
-                            className="px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full text-2xl font-semibold"
-                            onClick={() => router.push('/personal-details')}
-                        >
-                            Back
-                        </button>
-                    )}
-                    <button
-                        className="px-12 py-4 border-2 border-purple-500 text-purple-600 rounded-full text-2xl font-semibold mr-4"
-                        onClick={handleNeedHelpClick}
-                    >
-                        Need help?
-                    </button>
-                    <button
-                        className={`px-12 py-4 bg-gradient-to-r from-purple-600 to-pink-500 text-white rounded-full text-2xl font-semibold flex items-center transition-all ${selected.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        disabled={selected.length === 0 || loadingCheckInId !== null}
-                        onClick={handleNext}
-                    >
-                        Next
-                        <svg className="ml-2 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-                        </svg>
-                    </button>
-                </div>
             </main>
+
+            {/* Sticky footer button group */}
+            <div className="w-full bg-white flex justify-between max-w-2xl mx-auto mt-12 items-center py-4 px-4">
+                {error && (
+                    <button
+                        className="px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full text-2xl font-semibold"
+                        onClick={() => router.push('/personal-details')}
+                    >
+                        Back
+                    </button>
+                )}
+                <button
+                    className="px-12 py-4 border-2 border-purple-500 text-purple-600 rounded-full text-2xl font-semibold mr-4"
+                    onClick={handleNeedHelpClick}
+                >
+                    Need help?
+                </button>
+                <button
+                    className={`px-12 py-4 bg-gradient-to-r from-purple-600 to-pink-500 text-white rounded-full text-2xl font-semibold flex items-center transition-all ${selected.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={selected.length === 0 || loadingCheckInId !== null}
+                    onClick={handleNext}
+                >
+                    Next
+                    <svg className="ml-2 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+            </div>
         </div>
     );
 }
