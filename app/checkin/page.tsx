@@ -6,9 +6,12 @@ import { Booking } from '@/types/Booking';
 import Header from '@/app/components/Header';
 import api from '../lib/axios';
 
+const NEXUS_NUMBER = process.env.NEXT_PUBLIC_NEXUS_NUMBER || '6473603374';
+
 export default function CheckinPage() {
     const [referenceCode, setReferenceCode] = useState('');
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
     const router = useRouter();
 
     const handleReferenceCodeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -22,16 +25,18 @@ export default function CheckinPage() {
             return;
         }
 
+        setLoading(true);
         try {
             const params = new URLSearchParams({
                 bookingReference: referenceCode,
-                nexusNumber: '6473603374'
+                nexusNumber: NEXUS_NUMBER
             });
 
             const response = await api.get(`slots/booking?${params}`);
 
             if (!response.data || response.data.length === 0) {
                 setErrorMessage('Sorry, we cannot find the booking reference. We can get the booking using your other personal details');
+                setLoading(false);
                 return;
             }
 
@@ -57,6 +62,8 @@ export default function CheckinPage() {
         } catch (error) {
             console.error('Error fetching bookings:', error);
             setErrorMessage('Failed to fetch booking data. Please try again later.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -82,6 +89,7 @@ export default function CheckinPage() {
                         className="w-full p-6 text-4xl border-2 border-gray-300 rounded-xl mb-6 focus:outline-none focus:border-purple-500"
                         value={referenceCode}
                         onChange={handleReferenceCodeChange}
+                        disabled={loading}
                     />
                     {errorMessage && <p className="text-red-500 text-xl mt-2">{errorMessage}</p>}
                     <p className="text-xl text-gray-600 text-left mt-4">
@@ -89,6 +97,16 @@ export default function CheckinPage() {
                         <span className="font-semibold"> email</span> or <span className="font-semibold">text</span>
                     </p>
                 </div>
+
+                {loading && (
+                    <div className="flex items-center justify-center text-2xl text-gray-600 mb-8 gap-4">
+                        <span>Searching for your booking</span>
+                        <svg className="animate-spin h-7 w-7 text-purple-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                        </svg>
+                    </div>
+                )}
 
                 <button
                     className="px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full text-2xl font-semibold mb-8"
@@ -108,6 +126,7 @@ export default function CheckinPage() {
                     <button
                         className="px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full text-2xl font-semibold flex items-center"
                         onClick={handleNextClick}
+                        disabled={loading}
                     >
                         Next
                         <svg className="ml-2 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

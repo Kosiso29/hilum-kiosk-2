@@ -7,6 +7,8 @@ import Header from '@/app/components/Header';
 import AppointmentCard from '../components/AppointmentCard';
 import api from '../lib/axios';
 
+const NEXUS_NUMBER = process.env.NEXT_PUBLIC_NEXUS_NUMBER || '6473603374';
+
 function AppointmentsContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -35,7 +37,7 @@ function AppointmentsContent() {
                     // Call external API for bookingReference
                     const params = new URLSearchParams({
                         bookingReference,
-                        nexusNumber: '6473603374'
+                        nexusNumber: NEXUS_NUMBER
                     });
                     response = await api.get(`slots/booking?${params}`);
                 } else if (firstName && lastName && birthDate) {
@@ -44,7 +46,7 @@ function AppointmentsContent() {
                         firstName,
                         lastName,
                         patientDOB: birthDate,
-                        nexusNumber: '6473603374'
+                        nexusNumber: NEXUS_NUMBER
                     });
                     response = await api.get(`slots/booking?${params}`);
                 } else {
@@ -61,7 +63,7 @@ function AppointmentsContent() {
                 setBookings(response.data);
             } catch (error) {
                 console.error('Error searching bookings:', error);
-                setError('Failed to search for bookings. Please try again.');
+                setError('Failed to find bookings. Please try again.');
             } finally {
                 setLoading(false);
             }

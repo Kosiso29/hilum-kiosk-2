@@ -38,9 +38,11 @@ export default function Header() {
                 onClick={() => router.push('/')}
                 title="Go to Home"
             >
-                <Image src="/icons/icon-192x192.png" alt="Wosler Diagnostics Logo" width={80} height={80} className="mr-4" />
-                <span className="text-3xl font-bold">Wosler</span>
-                <span className="text-xl font-normal ml-1">DIAGNOSTICS</span>
+                <Image src="/logo.png" alt="Wosler Diagnostics Logo" width={60} height={60} className="mr-4" />
+                <span className="flex flex-col">
+                    <span className="text-3xl font-bold">Wosler</span>
+                    <span className="text-xl font-normal ml-1">DIAGNOSTICS</span>
+                </span>
             </div>
         </header>
     );
