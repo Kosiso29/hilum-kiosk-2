@@ -37,27 +37,27 @@ export default function PersonalDetailsPage() {
             <main className="flex flex-col items-center text-center flex-grow">
                 <h1 className="text-6xl font-bold mb-4">Check-In</h1>
                 <p className="text-3xl text-gray-600 mb-20">Enter personal details</p>
-                <div className="bg-gray-100 p-12 w-3/5 flex flex-col items-start mb-12">
+                <div className="bg-gray-100 p-12 w-4/5 flex flex-col items-start mb-12">
                     <h2 className="text-4xl font-semibold mb-8">Personal Details</h2>
                     <div className="grid grid-cols-2 gap-10 w-full mb-8">
                         <div>
-                            <label htmlFor="first-name" className="text-2xl font-semibold mb-4 block">First name <span className="text-purple-600">*</span></label>
+                            <label htmlFor="first-name" className="text-xl font-semibold mb-4 block">First name <span className="text-purple-600">*</span></label>
                             <input
                                 type="text"
                                 id="first-name"
                                 placeholder="Enter first name ..."
-                                className="w-full p-6 text-4xl border-2 border-gray-300 rounded-xl focus:outline-none focus:border-purple-500"
+                                className="w-full p-5 text-2xl border-2 border-gray-300 rounded-xl focus:outline-none focus:border-purple-500"
                                 value={firstName}
                                 onChange={(e) => setFirstName(e.target.value)}
                             />
                         </div>
                         <div>
-                            <label htmlFor="last-name" className="text-2xl font-semibold mb-4 block">Last name <span className="text-purple-600">*</span></label>
+                            <label htmlFor="last-name" className="text-xl font-semibold mb-4 block">Last name <span className="text-purple-600">*</span></label>
                             <input
                                 type="text"
                                 id="last-name"
                                 placeholder="Enter last name ..."
-                                className="w-full p-6 text-4xl border-2 border-gray-300 rounded-xl focus:outline-none focus:border-purple-500"
+                                className="w-full p-5 text-2xl border-2 border-gray-300 rounded-xl focus:outline-none focus:border-purple-500"
                                 value={lastName}
                                 onChange={(e) => setLastName(e.target.value)}
                             />
@@ -65,23 +65,23 @@ export default function PersonalDetailsPage() {
                     </div>
                     <div className="grid grid-cols-2 gap-10 w-full mb-8">
                         <div>
-                            <label htmlFor="date-of-birth" className="text-2xl font-semibold mb-4 block">Date-of-Birth <span className="text-purple-600">*</span></label>
+                            <label htmlFor="date-of-birth" className="text-xl font-semibold mb-4 block">Date-of-Birth <span className="text-purple-600">*</span></label>
                             <input
                                 type="text"
                                 id="date-of-birth"
                                 placeholder="YYYY-MM-DD"
-                                className="w-full p-6 text-4xl border-2 border-gray-300 rounded-xl focus:outline-none focus:border-purple-500"
+                                className="w-full p-5 text-2xl border-2 border-gray-300 rounded-xl focus:outline-none focus:border-purple-500"
                                 value={dateOfBirth}
                                 onChange={(e) => setDateOfBirth(e.target.value)}
                             />
                         </div>
                         <div>
-                            <label htmlFor="healthcare-number" className="text-2xl font-semibold mb-4 block">Healthcare Number <span className="text-gray-500">(optional)</span></label>
+                            <label htmlFor="healthcare-number" className="text-xl font-semibold mb-4 block">Healthcare Number <span className="text-gray-500">(optional)</span></label>
                             <input
                                 type="text"
                                 id="healthcare-number"
                                 placeholder="Enter healthcare number ..."
-                                className="w-full p-6 text-4xl border-2 border-gray-300 rounded-xl focus:outline-none focus:border-purple-500"
+                                className="w-full p-5 text-2xl border-2 border-gray-300 rounded-xl focus:outline-none focus:border-purple-500"
                                 value={healthcareNumber}
                                 onChange={(e) => setHealthcareNumber(e.target.value)}
                             />

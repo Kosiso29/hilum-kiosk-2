@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Header from "@/app/components/Header";
 
-export default function SuccessPage() {
+function SuccessContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [countdown, setCountdown] = useState(15);
@@ -62,5 +62,13 @@ export default function SuccessPage() {
                 </div>
             </main>
         </div>
+    );
+}
+
+export default function SuccessPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-2xl">Loading...</div>}>
+            <SuccessContent />
+        </Suspense>
     );
 } 

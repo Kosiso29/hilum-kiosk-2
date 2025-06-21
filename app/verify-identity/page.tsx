@@ -59,7 +59,7 @@ function VerifyIdentityContent() {
                             type="text"
                             id="date-of-birth"
                             placeholder="YYYY-MM-DD"
-                            className="w-full p-6 text-4xl border-2 border-gray-300 rounded-xl focus:outline-none focus:border-purple-500"
+                            className="w-full p-6 text-3xl border-2 border-gray-300 rounded-xl focus:outline-none focus:border-purple-500"
                             value={dateOfBirth}
                             onChange={(e) => setDateOfBirth(e.target.value)}
                         />
