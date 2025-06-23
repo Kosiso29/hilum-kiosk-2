@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Booking } from '@/types/Booking';
 import Header from '@/app/components/Header';
 import api from '../lib/axios';
+import Button from '../components/Button';
 
 const NEXUS_NUMBER = process.env.NEXT_PUBLIC_NEXUS_NUMBER || '6473603374';
 
@@ -108,12 +109,12 @@ export default function CheckinPage() {
                     </div>
                 )}
 
-                <button
+                <Button
                     className="px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full text-2xl font-semibold mb-8"
                     onClick={handleNoCodeClick}
                 >
                     I don&apos;t have a code
-                </button>
+                </Button>
                 <p className="text-xl text-gray-600 mb-20">
                     <span className="font-bold">We can get the booking using your other personal details.</span>
                 </p>
@@ -121,10 +122,10 @@ export default function CheckinPage() {
 
             {/* Sticky footer button group */}
             <div className="w-full bg-white flex space-x-8 items-center justify-center py-4">
-                <button className="px-12 py-4 border-2 border-purple-500 text-purple-600 rounded-full text-2xl font-semibold">
+                <Button className="px-12 py-4 border-2 border-purple-500 text-purple-600 rounded-full text-2xl font-semibold">
                     Need help?
-                </button>
-                <button
+                </Button>
+                <Button
                     className="px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full text-2xl font-semibold flex items-center"
                     onClick={handleNextClick}
                     disabled={loading}
@@ -133,7 +134,7 @@ export default function CheckinPage() {
                     <svg className="ml-2 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
                     </svg>
-                </button>
+                </Button>
             </div>
         </div>
     );

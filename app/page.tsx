@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import Header from '@/app/components/Header';
+import Button from './components/Button';
 
 export default function Home() {
   const router = useRouter();
@@ -47,12 +48,12 @@ export default function Home() {
             </p>
 
             {/* Tap anywhere to begin button */}
-            <button
+            <Button
               className="bg-gradient-to-r from-purple-600 to-pink-500 text-white text-xl font-medium px-12 py-4 rounded-full shadow-lg transform transition-transform duration-200 active:scale-95"
               onClick={handleTapToBegin}
             >
               Tap anywhere to begin
-            </button>
+            </Button>
           </main>
         </div>
       </div>

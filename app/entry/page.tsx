@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import Header from '@/app/components/Header';
+import Button from '../components/Button';
 
 export default function CheckinPage() {
     const router = useRouter();
@@ -56,15 +57,15 @@ export default function CheckinPage() {
 
             {/* Sticky footer button group */}
             <div className="w-full bg-white flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-8 items-center justify-center py-4">
-                <button className="px-8 md:px-12 py-4 border-2 border-purple-500 text-purple-600 rounded-full text-lg md:text-2xl font-semibold">
+                <Button className="px-8 md:px-12 py-4 border-2 border-purple-500 text-purple-600 rounded-full text-lg md:text-2xl font-semibold">
                     Need help?
-                </button>
-                <button className="px-8 md:px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full text-lg md:text-2xl font-semibold flex items-center">
+                </Button>
+                <Button className="px-8 md:px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full text-lg md:text-2xl font-semibold flex items-center">
                     Next
                     <svg className="ml-2 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
                     </svg>
-                </button>
+                </Button>
             </div>
         </div>
     );

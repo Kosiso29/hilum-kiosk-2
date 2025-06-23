@@ -2,6 +2,7 @@
 
 import Header from "@/app/components/Header";
 import { useRouter } from "next/navigation";
+import Button from '../components/Button';
 
 export default function WalkInPage() {
     const router = useRouter();
@@ -35,12 +36,12 @@ export default function WalkInPage() {
                         <p className="text-lg text-gray-400 mb-8 max-w-md">
                             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.
                         </p>
-                        <button
+                        <Button
                             className="px-10 py-3 bg-indigo-500 text-white rounded-full text-xl font-semibold shadow-md hover:bg-indigo-600 transition"
                             onClick={() => router.back()}
                         >
                             Back
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </main>

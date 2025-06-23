@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/app/components/Header';
+import Button from '../components/Button';
 
 export default function PersonalDetailsPage() {
     const [firstName, setFirstName] = useState('');
@@ -97,16 +98,16 @@ export default function PersonalDetailsPage() {
             </main>
             {/* Sticky footer button group */}
             <div className="w-full bg-white flex space-x-8 items-center justify-center py-4">
-                <button
+                <Button
                     className="px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full text-2xl font-semibold"
                     onClick={handleBackClick}
                 >
                     Back
-                </button>
-                <button className="px-12 py-4 border-2 border-purple-500 text-purple-600 rounded-full text-2xl font-semibold">
+                </Button>
+                <Button className="px-12 py-4 border-2 border-purple-500 text-purple-600 rounded-full text-2xl font-semibold">
                     Need help?
-                </button>
-                <button
+                </Button>
+                <Button
                     className="px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full text-2xl font-semibold flex items-center"
                     onClick={handleNextClick}
                 >
@@ -114,7 +115,7 @@ export default function PersonalDetailsPage() {
                     <svg className="ml-2 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
                     </svg>
-                </button>
+                </Button>
             </div>
         </div>
     );

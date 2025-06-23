@@ -3,6 +3,7 @@
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '@/app/components/Header';
+import Button from '../components/Button';
 
 function VerifyIdentityContent() {
     const [dateOfBirth, setDateOfBirth] = useState('');
@@ -71,21 +72,21 @@ function VerifyIdentityContent() {
                 </div>
 
                 {errorMessage && errorMessage.includes('not the right booking') && (
-                    <button
+                    <Button
                         className="px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full text-2xl font-semibold mb-8"
                         onClick={handleOtherDetailsClick}
                     >
                         Get booking details other way
-                    </button>
+                    </Button>
                 )}
             </main>
 
             {/* Sticky footer button group */}
             <div className="w-full bg-white flex space-x-8 items-center justify-center py-4 mt-auto">
-                <button className="px-12 py-4 border-2 border-purple-500 text-purple-600 rounded-full text-2xl font-semibold">
+                <Button className="px-12 py-4 border-2 border-purple-500 text-purple-600 rounded-full text-2xl font-semibold">
                     Need help?
-                </button>
-                <button
+                </Button>
+                <Button
                     className="px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full text-2xl font-semibold flex items-center"
                     onClick={handleNextClick}
                 >
@@ -93,7 +94,7 @@ function VerifyIdentityContent() {
                     <svg className="ml-2 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
                     </svg>
-                </button>
+                </Button>
             </div>
         </div>
     );
