@@ -6,6 +6,7 @@ import { Booking } from '@/types/Booking';
 import Header from '@/app/components/Header';
 import api from '../lib/axios';
 import Button from '../components/Button';
+import Input from '../components/Input';
 
 const NEXUS_NUMBER = process.env.NEXT_PUBLIC_NEXUS_NUMBER || '6473603374';
 
@@ -83,7 +84,7 @@ export default function CheckinPage() {
 
                 <div className="bg-gray-100 p-12 w-3/5 flex flex-col items-start mb-12">
                     <label htmlFor="reference-code" className="text-3xl font-semibold mb-6">Reference Code</label>
-                    <input
+                    <Input
                         type="text"
                         id="reference-code"
                         placeholder="############"

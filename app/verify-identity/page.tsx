@@ -4,6 +4,7 @@ import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '@/app/components/Header';
 import Button from '../components/Button';
+import Input from '../components/Input';
 
 function VerifyIdentityContent() {
     const [dateOfBirth, setDateOfBirth] = useState('');
@@ -56,7 +57,7 @@ function VerifyIdentityContent() {
                     <h2 className="text-4xl font-semibold mb-8">Personal Details</h2>
                     <div className="w-full">
                         <label htmlFor="date-of-birth" className="text-2xl font-semibold mb-4 block">Enter Date of Birth <span className="text-purple-600">*</span></label>
-                        <input
+                        <Input
                             type="text"
                             id="date-of-birth"
                             placeholder="YYYY-MM-DD"

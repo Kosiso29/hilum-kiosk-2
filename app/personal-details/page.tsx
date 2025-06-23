@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/app/components/Header';
 import Button from '../components/Button';
+import Input from '../components/Input';
 
 export default function PersonalDetailsPage() {
     const [firstName, setFirstName] = useState('');
@@ -43,7 +44,7 @@ export default function PersonalDetailsPage() {
                     <div className="grid grid-cols-2 gap-10 w-full mb-8">
                         <div>
                             <label htmlFor="first-name" className="text-xl font-semibold mb-4 block">First name <span className="text-purple-600">*</span></label>
-                            <input
+                            <Input
                                 type="text"
                                 id="first-name"
                                 placeholder="Enter first name ..."
@@ -54,7 +55,7 @@ export default function PersonalDetailsPage() {
                         </div>
                         <div>
                             <label htmlFor="last-name" className="text-xl font-semibold mb-4 block">Last name <span className="text-purple-600">*</span></label>
-                            <input
+                            <Input
                                 type="text"
                                 id="last-name"
                                 placeholder="Enter last name ..."
@@ -67,7 +68,7 @@ export default function PersonalDetailsPage() {
                     <div className="grid grid-cols-2 gap-10 w-full mb-8">
                         <div>
                             <label htmlFor="date-of-birth" className="text-xl font-semibold mb-4 block">Date-of-Birth <span className="text-purple-600">*</span></label>
-                            <input
+                            <Input
                                 type="text"
                                 id="date-of-birth"
                                 placeholder="YYYY-MM-DD"
@@ -78,7 +79,7 @@ export default function PersonalDetailsPage() {
                         </div>
                         <div>
                             <label htmlFor="healthcare-number" className="text-xl font-semibold mb-4 block">Healthcare Number <span className="text-gray-500">(optional)</span></label>
-                            <input
+                            <Input
                                 type="text"
                                 id="healthcare-number"
                                 placeholder="Enter healthcare number ..."
