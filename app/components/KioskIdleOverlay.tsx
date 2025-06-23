@@ -1,15 +1,19 @@
 "use client";
 import { useEffect, useRef, useCallback } from "react";
+import { usePathname } from "next/navigation";
 
 export default function KioskIdleOverlay() {
     const timer = useRef<NodeJS.Timeout | null>(null);
+    const pathname = usePathname();
 
     const resetIdleTimer = useCallback(() => {
         if (timer.current) clearTimeout(timer.current);
         timer.current = setTimeout(() => {
-            window.location.href = "/";
+            if (pathname !== "/") {
+                window.location.href = "/";
+            }
         }, 45000);
-    }, []);
+    }, [pathname]);
 
     useEffect(() => {
         const events = ["mousedown", "mousemove", "keydown", "touchstart"];
