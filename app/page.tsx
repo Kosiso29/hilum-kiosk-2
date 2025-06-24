@@ -17,7 +17,7 @@ export default function Home() {
       <div className="fixed z-50 w-full p-8">
         <Header />
       </div>
-      <div className="relative bg-[#f2f3f5] min-h-screen flex flex-col items-center justify-center p-8 overflow-hidden" onClick={handleTapToBegin}>
+      <div className="relative bg-[#f2f3f5] min-h-screen flex flex-col items-center justify-center overflow-hidden" onClick={handleTapToBegin}>
         <div className="bg-white absolute z-0 top-0 right-0 translate-y-[-10%] translate-x-[30%] rotate-z-12 h-[60vh] w-max">
           <video
             autoPlay
@@ -36,9 +36,12 @@ export default function Home() {
         {/* All existing content will be above the video, adjust z-index */}
         <div className="z-20 w-full h-full flex flex-col justify-between">
           {/* Top-aligned, left-aligned welcome content */}
-          <main className="flex flex-col items-start text-left ml-8">
-            <h1 className="text-6xl font-bold mb-4">Welcome to<br />Wosler Diagnostics</h1>
-            <p className="text-lg font-normal opacity-80 mb-12">
+          <main className="flex flex-col justify-center h-screen items-start text-left p-8">
+            <h2 className="text-4xl text-black mb-2">Welcome to</h2>
+            <h1 className="text-7xl font-medium text-black leading-tight tracking-tight">
+              Wosler<br />Diagnostics
+            </h1>
+            <p className="text-xl text-gray-500 mt-8">
               Checking in for your appointment or<br />registering as walk-in?
             </p>
           </main>

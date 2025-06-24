@@ -24,13 +24,15 @@ export default function Header() {
 
     return (
         <header className="w-full flex justify-between items-center mb-16">
-            <div className="flex items-center space-x-2 text-4xl font-semibold">
-                <span>{currentTime.split(' ')[0]}</span>
-                <span className="text-xl self-start mt-1">{currentTime.split(' ')[1]}</span>
-                <div className="ml-8 text-2xl font-normal border-l-2 border-gray-300 pl-4">
-                    {currentDate.split(',')[0]}
+            <div className="flex items-end space-x-2 text-4xl font-normal">
+                <p className='mb-2'>
+                    <span>{currentTime.split(' ')[0]}</span>
+                    <span className="text-xl self-start ml-2">{currentTime.split(' ')[1]}</span>
+                </p>
+                <div className="ml-2 text-xl font-normal border-l-2 border-gray-300 pl-4">
+                    {currentDate.split(' ')[1]} {currentDate.split(' ')[2]}
                     <br />
-                    {currentDate.split(',')[1]}
+                    {currentDate.split(' ')[0]}
                 </div>
             </div>
             <div
