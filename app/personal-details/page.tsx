@@ -39,7 +39,7 @@ export default function PersonalDetailsPage() {
             <main className="flex flex-col items-center text-center flex-grow">
                 <h1 className="text-6xl font-bold mb-4">Check-In</h1>
                 <p className="text-3xl text-gray-600 mb-20">Enter personal details</p>
-                <div className="bg-gray-100 p-12 w-4/5 flex flex-col items-start mb-12">
+                <div className="rounded-3xl p-12 w-4/5 flex flex-col items-start mb-12 card-shadow">
                     <h2 className="text-4xl font-semibold mb-8">Personal Details</h2>
                     <div className="grid grid-cols-2 gap-10 w-full mb-8">
                         <div>

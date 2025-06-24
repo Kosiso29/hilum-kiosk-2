@@ -82,7 +82,7 @@ export default function CheckinPage() {
                 <h1 className="text-6xl font-bold mb-4">Check-In</h1>
                 <p className="text-3xl text-gray-600 mb-20">Enter booking reference code</p>
 
-                <div className="bg-gray-100 p-12 w-3/5 flex flex-col items-start mb-12">
+                <div className="rounded-3xl p-12 w-3/5 flex flex-col items-start mb-4 card-shadow">
                     <label htmlFor="reference-code" className="text-3xl font-semibold mb-6">Reference Code</label>
                     <Input
                         type="text"
@@ -100,15 +100,17 @@ export default function CheckinPage() {
                     </p>
                 </div>
 
-                {loading && (
-                    <div className="flex items-center justify-center text-2xl text-gray-600 mb-8 gap-4">
-                        <span>Searching for your booking</span>
-                        <svg className="animate-spin h-7 w-7 text-purple-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-                        </svg>
-                    </div>
-                )}
+                <div className="relative h-20 w-full mb-2">
+                    {loading && (
+                        <div className="absolute w-full inset-0 flex items-center justify-center text-2xl text-gray-600 gap-4">
+                            <span>Searching for your booking</span>
+                            <svg className="animate-spin h-7 w-7 text-purple-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                            </svg>
+                        </div>
+                    )}
+                </div>
 
                 <Button
                     className="px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full text-2xl font-semibold mb-8"

@@ -53,7 +53,7 @@ function VerifyIdentityContent() {
                 <h1 className="text-6xl font-bold mb-4">Verify Your Identity</h1>
                 <p className="text-3xl text-gray-600 mb-20">Please enter your date-of-birth to verify your identity</p>
 
-                <div className="bg-gray-100 p-12 w-3/5 flex flex-col items-start mb-12">
+                <div className="rounded-3xl p-12 w-3/5 flex flex-col items-start mb-12 card-shadow">
                     <h2 className="text-4xl font-semibold mb-8">Personal Details</h2>
                     <div className="w-full">
                         <label htmlFor="date-of-birth" className="text-2xl font-semibold mb-4 block">Enter Date of Birth <span className="text-purple-600">*</span></label>

@@ -53,3 +53,7 @@ body {
   aspect-ratio: 9 / 16;
   touch-action: manipulation;
 }
+
+.card-shadow {
+  box-shadow: 0px 4px 22.2px 0px rgba(188, 187, 187, 0.18);
+}
