@@ -4,10 +4,11 @@ import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '@/app/components/Header';
 import Button from '../components/Button';
-import Input from '../components/Input';
+import { DatePicker } from '../components/DatePicker';
+import { format } from 'date-fns';
 
 function VerifyIdentityContent() {
-    const [dateOfBirth, setDateOfBirth] = useState('');
+    const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -25,7 +26,7 @@ function VerifyIdentityContent() {
             return;
         }
 
-        if (bookingBirthDate && dateOfBirth === bookingBirthDate) {
+        if (bookingBirthDate && format(dateOfBirth, 'yyyy-MM-dd') === bookingBirthDate) {
             const query = new URLSearchParams({
                 firstName: bookingFirstName || '',
                 lastName: bookingLastName || '',
@@ -57,13 +58,10 @@ function VerifyIdentityContent() {
                     <h2 className="text-4xl font-semibold mb-8">Personal Details</h2>
                     <div className="w-full">
                         <label htmlFor="date-of-birth" className="text-2xl font-semibold mb-4 block">Enter Date of Birth <span className="text-purple-600">*</span></label>
-                        <Input
-                            type="text"
-                            id="date-of-birth"
-                            placeholder="YYYY-MM-DD"
+                        <DatePicker
+                            date={dateOfBirth}
+                            setDate={setDateOfBirth}
                             className="w-full p-6 text-3xl border-2 border-gray-300 rounded-xl focus:outline-none focus:border-purple-500"
-                            value={dateOfBirth}
-                            onChange={(e) => setDateOfBirth(e.target.value)}
                         />
                     </div>
                     {errorMessage && <p className="text-red-500 text-xl mt-4">{errorMessage}</p>}

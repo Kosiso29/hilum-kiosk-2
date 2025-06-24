@@ -5,11 +5,13 @@ import { useRouter } from 'next/navigation';
 import Header from '@/app/components/Header';
 import Button from '../components/Button';
 import Input from '../components/Input';
+import { DatePicker } from '../components/DatePicker';
+import { format } from 'date-fns';
 
 export default function PersonalDetailsPage() {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
-    const [dateOfBirth, setDateOfBirth] = useState('');
+    const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>();
     const [healthcareNumber, setHealthcareNumber] = useState('');
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
@@ -27,7 +29,7 @@ export default function PersonalDetailsPage() {
         const query = new URLSearchParams({
             firstName,
             lastName,
-            birthDate: dateOfBirth,
+            birthDate: dateOfBirth ? format(dateOfBirth, 'yyyy-MM-dd') : '',
             ...(healthcareNumber && { healthCard: healthcareNumber }),
         }).toString();
         router.push(`/appointments?${query}`);
@@ -68,13 +70,10 @@ export default function PersonalDetailsPage() {
                     <div className="grid grid-cols-2 gap-10 w-full mb-8">
                         <div>
                             <label htmlFor="date-of-birth" className="text-xl font-semibold mb-4 block">Date-of-Birth <span className="text-purple-600">*</span></label>
-                            <Input
-                                type="text"
-                                id="date-of-birth"
-                                placeholder="YYYY-MM-DD"
+                            <DatePicker
+                                date={dateOfBirth}
+                                setDate={setDateOfBirth}
                                 className="w-full p-5 text-2xl border-2 border-gray-300 rounded-xl focus:outline-none focus:border-purple-500"
-                                value={dateOfBirth}
-                                onChange={(e) => setDateOfBirth(e.target.value)}
                             />
                         </div>
                         <div>
