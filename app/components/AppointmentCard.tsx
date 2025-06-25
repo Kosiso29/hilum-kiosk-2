@@ -20,7 +20,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({ service, time, disabl
                     <div className="text-lg text-gray-500 font-medium">{time}</div>
                 </div>
                 <button
-                    className={`ml-4 px-10 py-3 rounded-full border-2 text-xl font-semibold transition-all
+                    className={`ml-4 px-10 py-3 rounded-full border-2 text-xl font-semibold transition-all w-[12rem]
                         ${disabled || loading
                             ? 'border-gray-300 text-gray-400 bg-white cursor-not-allowed'
                             : selected

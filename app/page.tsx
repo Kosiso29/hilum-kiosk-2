@@ -18,7 +18,7 @@ export default function Home() {
         <Header />
       </div>
       <div className="relative bg-[#f2f3f5] min-h-screen flex flex-col items-center justify-center overflow-hidden" onClick={handleTapToBegin}>
-        <div className="bg-white absolute z-0 top-0 right-0 translate-y-[-10%] translate-x-[30%] rotate-z-12 h-[60vh] w-max">
+        <div className="bg-white absolute z-0 top-0 right-0 translate-y-[-10%] translate-x-[30%] rotate-z-12 h-[60vmax] w-max">
           <video
             autoPlay
             loop
