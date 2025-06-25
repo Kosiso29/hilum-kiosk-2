@@ -37,7 +37,7 @@ function VerifyIdentityContent() {
             }).toString();
             router.push(`/appointments?${query}`);
         } else {
-            setErrorMessage('Sorry, this may not be the right booking, please click on get booking details other way.');
+            setErrorMessage('We couldn\'t verify your identity with the information provided. Please double-check your date of birth, or try verifying with your personal details below.');
         }
     };
 
@@ -64,20 +64,25 @@ function VerifyIdentityContent() {
                             className="w-full p-6 text-3xl border-2 border-gray-300 rounded-xl focus:outline-none focus:border-purple-500"
                         />
                     </div>
-                    {errorMessage && <p className="text-red-500 text-xl mt-4">{errorMessage}</p>}
+                    {errorMessage && (
+                        <div className="flex flex-col items-start w-full mt-4">
+                            <p className="text-red-500 text-xl mb-4">{errorMessage}</p>
+                            <Button
+                                className="px-10 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-2xl text-xl font-semibold shadow-md"
+                                onClick={handleOtherDetailsClick}
+                            >
+                                Try using personal details <span className="inline-flex items-center">instead
+                                    <svg className="ml-2 w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </span>
+                            </Button>
+                        </div>
+                    )}
                     <p className="text-xl text-gray-600 text-left mt-8">
                         Please enter your Date of Birth to verify your identity
                     </p>
                 </div>
-
-                {errorMessage && errorMessage.includes('not the right booking') && (
-                    <Button
-                        className="px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full text-2xl font-semibold mb-8"
-                        onClick={handleOtherDetailsClick}
-                    >
-                        Get booking details other way
-                    </Button>
-                )}
             </main>
 
             {/* Sticky footer button group */}
