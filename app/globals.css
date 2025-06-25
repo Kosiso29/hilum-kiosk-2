@@ -57,3 +57,19 @@ body {
 .card-shadow {
   box-shadow: 0px 4px 22.2px 0px rgba(188, 187, 187, 0.18);
 }
+
+.homepage-gradient-border-wrapper {
+  display: inline-block;
+  padding: 3px;
+  /* border thickness */
+  border-radius: 9999px;
+  /* fully rounded */
+  background: conic-gradient(from 93.9deg at 50% 50%, #6F00FF 0deg, #9E1CD6 360deg);
+}
+
+.homepage-gradient-btn {
+  background: linear-gradient(90deg, rgba(171, 74, 184, 0.88) 0%, rgba(151, 71, 255, 0.88) 100%);
+  color: #fff;
+  border: none;
+  border-radius: 9999px;
+}

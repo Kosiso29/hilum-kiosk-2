@@ -47,12 +47,14 @@ export default function Home() {
           </main>
           {/* Button centered at the bottom */}
           <div className="absolute bottom-20 flex justify-center w-full mt-auto mb-12">
-            <Button
-              className="bg-gradient-to-r from-purple-600 to-pink-500 text-white text-xl font-medium px-12 py-4 rounded-full shadow-lg transform transition-transform duration-200 active:scale-95"
-              onClick={handleTapToBegin}
-            >
-              Tap anywhere to begin
-            </Button>
+            <div className="homepage-gradient-border-wrapper">
+              <Button
+                className="homepage-gradient-btn text-xl font-medium px-12 py-4 rounded-full transform transition-transform duration-200 active:scale-95"
+                onClick={handleTapToBegin}
+              >
+                Tap anywhere to begin
+              </Button>
+            </div>
           </div>
         </div>
       </div>

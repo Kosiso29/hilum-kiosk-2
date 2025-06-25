@@ -113,7 +113,7 @@ export default function CheckinPage() {
                 </div>
 
                 <Button
-                    className="px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full text-2xl font-semibold mb-8"
+                    className="px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-3xl text-2xl font-semibold mb-8"
                     onClick={handleNoCodeClick}
                 >
                     I don&apos;t have a code
@@ -125,11 +125,11 @@ export default function CheckinPage() {
 
             {/* Sticky footer button group */}
             <div className="w-full bg-white flex space-x-8 items-center justify-center py-4">
-                <Button className="px-12 py-4 border-2 border-purple-500 text-purple-600 rounded-full text-2xl font-semibold">
+                <Button className="px-12 py-4 border-2 border-purple-500 text-purple-600 rounded-3xl text-2xl font-semibold">
                     Need help?
                 </Button>
                 <Button
-                    className="px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full text-2xl font-semibold flex items-center"
+                    className="px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-3xl text-2xl font-semibold flex items-center"
                     onClick={handleNextClick}
                     disabled={loading}
                 >
