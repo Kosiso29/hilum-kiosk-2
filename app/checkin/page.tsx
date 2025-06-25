@@ -7,6 +7,8 @@ import Header from '@/app/components/Header';
 import api from '../lib/axios';
 import Button from '../components/Button';
 import Input from '../components/Input';
+import { useDispatch } from 'react-redux';
+import { setBookings } from '../store/bookingSlice';
 
 const NEXUS_NUMBER = process.env.NEXT_PUBLIC_NEXUS_NUMBER || '6473603374';
 
@@ -15,6 +17,7 @@ export default function CheckinPage() {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const router = useRouter();
+    const dispatch = useDispatch();
 
     const handleReferenceCodeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setReferenceCode(event.target.value);
@@ -43,19 +46,11 @@ export default function CheckinPage() {
             }
 
             const bookings: Booking[] = response.data;
-
-            // The API returns an array, so we take the first booking
-            const foundBooking = bookings[0];
-
-            if (foundBooking) {
-                // Pass the found booking details to the verification page
+            if (bookings.length > 0) {
+                dispatch(setBookings(bookings));
+                // Only pass bookingReference in the query
                 const query = new URLSearchParams({
-                    bookingReference: foundBooking.bookingReference,
-                    firstName: foundBooking.patient.firstName,
-                    lastName: foundBooking.patient.lastName,
-                    birthDate: new Date(foundBooking.patient.birthDate).toISOString().split('T')[0],
-                    phoneNumber: foundBooking.patient.phoneNumber || '',
-                    healthCard: foundBooking.patient.Healthcard || '',
+                    bookingReference: referenceCode
                 }).toString();
                 router.push(`/verify-identity?${query}`);
             } else {

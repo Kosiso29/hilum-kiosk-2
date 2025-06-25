@@ -1,76 +1,21 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Booking } from '@/types/Booking';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Header from '@/app/components/Header';
 import AppointmentCard from '../components/AppointmentCard';
 import api from '../lib/axios';
 import Button from '../components/Button';
+import { useSelector } from 'react-redux';
+import { RootState } from '../store';
 
-const NEXUS_NUMBER = process.env.NEXT_PUBLIC_NEXUS_NUMBER || '6473603374';
-
-function AppointmentsContent() {
+export default function AppointmentsPage() {
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const [bookings, setBookings] = useState<Booking[]>([]);
-    const [loading, setLoading] = useState(false);
+    const bookings = useSelector((state: RootState) => state.booking.bookings);
     const [error, setError] = useState<string | null>(null);
     const [loadingCheckInId, setLoadingCheckInId] = useState<number | null>(null);
     const [checkInError, setCheckInError] = useState<{ [id: number]: string }>({});
     const [selected, setSelected] = useState<number[]>([]);
-
-    const firstName = searchParams.get('firstName');
-    const lastName = searchParams.get('lastName');
-    const birthDate = searchParams.get('birthDate');
-    const phoneNumber = searchParams.get('phoneNumber');
-    const healthCard = searchParams.get('healthCard');
-    const bookingReference = searchParams.get('bookingReference');
-
-    useEffect(() => {
-        const searchBookings = async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                let response;
-
-                if (bookingReference && birthDate) {
-                    // Call external API for bookingReference
-                    const params = new URLSearchParams({
-                        bookingReference,
-                        nexusNumber: NEXUS_NUMBER
-                    });
-                    response = await api.get(`slots/booking?${params}`);
-                } else if (firstName && lastName && birthDate) {
-                    // Call external API for personal details
-                    const params = new URLSearchParams({
-                        firstName,
-                        lastName,
-                        patientDOB: birthDate,
-                        nexusNumber: NEXUS_NUMBER
-                    });
-                    response = await api.get(`slots/booking?${params}`);
-                } else {
-                    setLoading(false);
-                    return;
-                }
-
-                if (!response.data || response.data.length === 0) {
-                    setError('No bookings found for the provided details.');
-                    setLoading(false);
-                    return;
-                }
-
-                setBookings(response.data);
-            } catch (error) {
-                console.error('Error searching bookings:', error);
-                setError('Failed to find bookings. Please try again.');
-            } finally {
-                setLoading(false);
-            }
-        };
-        searchBookings();
-    }, [firstName, lastName, birthDate, phoneNumber, healthCard, bookingReference]);
 
     const handleSelect = (id: number, disabled: boolean, canCheckIn?: boolean) => {
         if (disabled) return;
@@ -145,24 +90,14 @@ function AppointmentsContent() {
             <main className="flex flex-col items-center text-center flex-grow w-full">
                 {/* Patient Name and Instructions */}
                 <div className="w-full flex flex-col items-center mb-12">
-                    <h2 className="text-4xl font-semibold text-gray-300 mb-2">{firstName ? `${firstName}'s Appointments` : 'Appointments'}</h2>
+                    <h2 className="text-4xl font-semibold text-gray-300 mb-2">{bookings[0].patient.firstName ? `${bookings[0].patient.firstName}'s Appointments` : 'Appointments'}</h2>
                     <div className="text-xl text-gray-500 mb-1">
                         Tap the <span className="text-purple-500 font-semibold">&ldquo;Check in&rdquo;</span> to select appointments
                     </div>
                     <div className="text-base text-gray-400">( Select no more than 2 items )</div>
                 </div>
 
-                {loading && (
-                    <div className="flex items-center justify-center text-2xl text-gray-600 mb-8 gap-4">
-                        <span>Searching for your appointments </span>
-                        <svg className="animate-spin h-7 w-7 text-purple-500 mr-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-                        </svg>
-                    </div>
-                )}
-
-                {!loading && bookings.length > 0 && (
+                {bookings.length > 0 && (
                     <div className="flex flex-col items-center w-full">
                         {bookings.map((booking) => {
                             const now = new Date();
@@ -237,18 +172,3 @@ function AppointmentsContent() {
         </div>
     );
 }
-
-export default function AppointmentsPage() {
-    return (
-        <Suspense fallback={
-            <div className="min-h-screen bg-white text-gray-900 flex flex-col items-center p-8">
-                <Header />
-                <main className="flex flex-col items-center text-center flex-grow">
-                    <div className="text-2xl text-gray-600">Loading...</div>
-                </main>
-            </div>
-        }>
-            <AppointmentsContent />
-        </Suspense>
-    );
-} 

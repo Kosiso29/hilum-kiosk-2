@@ -1,24 +1,22 @@
 'use client';
 
-import { useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Header from '@/app/components/Header';
 import Button from '../components/Button';
 import { DatePicker } from '../components/DatePicker';
 import { format } from 'date-fns';
+import { useSelector } from 'react-redux';
+import { RootState } from '../store';
 
-function VerifyIdentityContent() {
+export default function VerifyIdentityPage() {
     const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const router = useRouter();
-    const searchParams = useSearchParams();
 
-    const bookingFirstName = searchParams.get('firstName');
-    const bookingLastName = searchParams.get('lastName');
-    const bookingBirthDate = searchParams.get('birthDate');
-    const bookingReference = searchParams.get('bookingReference');
-    const bookingPhoneNumber = searchParams.get('phoneNumber');
-    const bookingHealthCard = searchParams.get('healthCard');
+    // Get bookings from Redux
+    const bookings = useSelector((state: RootState) => state.booking.bookings);
+    const firstBooking = bookings && bookings.length > 0 ? bookings[0] : null;
 
     const handleNextClick = () => {
         if (!dateOfBirth) {
@@ -26,16 +24,8 @@ function VerifyIdentityContent() {
             return;
         }
 
-        if (bookingBirthDate && format(dateOfBirth, 'yyyy-MM-dd') === bookingBirthDate) {
-            const query = new URLSearchParams({
-                firstName: bookingFirstName || '',
-                lastName: bookingLastName || '',
-                birthDate: bookingBirthDate,
-                bookingReference: bookingReference || '',
-                phoneNumber: bookingPhoneNumber || '',
-                healthCard: bookingHealthCard || '',
-            }).toString();
-            router.push(`/appointments?${query}`);
+        if (firstBooking && format(dateOfBirth, 'yyyy-MM-dd') === new Date(firstBooking.patient.birthDate).toISOString().split('T')[0]) {
+            router.push(`/appointments`);
         } else {
             setErrorMessage('We couldn\'t verify your identity with the information provided. Please double-check your date of birth, or try verifying with your personal details below.');
         }
@@ -103,18 +93,3 @@ function VerifyIdentityContent() {
         </div>
     );
 }
-
-export default function VerifyIdentityPage() {
-    return (
-        <Suspense fallback={
-            <div className="min-h-screen bg-white text-gray-900 flex flex-col items-center p-8">
-                <Header />
-                <main className="flex flex-col items-center text-center flex-grow">
-                    <div className="text-2xl text-gray-600">Loading...</div>
-                </main>
-            </div>
-        }>
-            <VerifyIdentityContent />
-        </Suspense>
-    );
-} 
