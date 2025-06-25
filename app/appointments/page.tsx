@@ -176,16 +176,26 @@ function AppointmentsContent() {
                                 diffToStart <= 30 && diffToStart >= -10; // between -10 and 30 min
                             const past = end < now;
                             const isSelected = selected.includes(booking.id);
+
+                            // Extract the time portion (HH:mm) from the ISO string directly
+                            const extractTime = (isoString: string) => {
+                                // Handles both Z and offset formats
+                                const match = isoString.match(/T(\d{2}:\d{2})/);
+                                return match ? match[1] : '';
+                            };
+                            const startTime = extractTime(booking.startTimeStamp);
+                            const endTime = extractTime(booking.endTimeStamp);
+
                             return (
                                 <AppointmentCard
                                     key={booking.id}
                                     service={booking.service.service}
-                                    time={`${start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
+                                    time={`${startTime} - ${endTime}`}
                                     disabled={past || loadingCheckInId !== null || !canCheckIn}
                                     loading={loadingCheckInId === booking.id}
                                     error={checkInError[booking.id]}
                                     selected={isSelected}
-                                    onCheckIn={() => canCheckIn && !past && !loadingCheckInId ? () => handleSelect(booking.id, false, true) : undefined}
+                                    onCheckIn={canCheckIn && !past && !loadingCheckInId ? () => handleSelect(booking.id, false, true) : undefined}
                                 />
                             );
                         })}
