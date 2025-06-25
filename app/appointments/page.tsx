@@ -102,21 +102,9 @@ function AppointmentsContent() {
             const booking = bookings.find((b) => b.id === id);
             if (!booking) continue;
             setLoadingCheckInId(booking.id);
-            // TODO: implement when the telelink api is available
-            // const velox_id = booking.externalBooking?.externalBookingReference;
-            // const mrn = booking.externalBooking?.mrn || "910";
-            // if (!velox_id) {
-            //     setCheckInError((prev) => ({ ...prev, [booking.id]: "Unable to check in: missing external booking reference." }));
-            //     allSucceeded = false;
-            //     continue;
-            // }
             try {
-                // TODO: implement when the telelink api is available
-                // await import('axios').then(({ default: axios }) =>
-                //     axios.put(`http://15.157.121.170/appointment/check-in/${velox_id}/${mrn}`, { referring_doctor: 'test test' })
-                // );
-                // simulate api call
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                // Call the new check-in API endpoint
+                await api.get(`check-in/${booking.bookingReference}`);
                 lastSuccessBooking = booking;
                 // Clear error if check-in succeeds
                 setCheckInError((prev) => ({ ...prev, [booking.id]: '' }));
@@ -159,7 +147,7 @@ function AppointmentsContent() {
                 <div className="w-full flex flex-col items-center mb-12">
                     <h2 className="text-4xl font-semibold text-gray-300 mb-2">{firstName ? `${firstName}'s Appointments` : 'Appointments'}</h2>
                     <div className="text-xl text-gray-500 mb-1">
-                        Tap the <span className="text-purple-500 font-semibold">“Check in”</span> to select appointments
+                        Tap the <span className="text-purple-500 font-semibold">&ldquo;Check in&rdquo;</span> to select appointments
                     </div>
                     <div className="text-base text-gray-400">( Select no more than 2 items )</div>
                 </div>
@@ -197,7 +185,7 @@ function AppointmentsContent() {
                                     loading={loadingCheckInId === booking.id}
                                     error={checkInError[booking.id]}
                                     selected={isSelected}
-                                    onCheckIn={() => canCheckIn && !past && !loadingCheckInId ? handleSelect(booking.id, false, true) : undefined}
+                                    onCheckIn={() => canCheckIn && !past && !loadingCheckInId ? () => handleSelect(booking.id, false, true) : undefined}
                                 />
                             );
                         })}
