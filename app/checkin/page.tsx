@@ -69,12 +69,12 @@ export default function CheckinPage() {
     };
 
     return (
-        <div className="min-h-screen bg-white text-gray-900 flex flex-col items-center p-8">
+        <div className="min-h-screen bg-white text-gray-900 flex flex-col p-8">
             <Header />
 
             {/* Main Content */}
-            <main className="flex flex-col items-center text-center flex-grow">
-                <h1 className="text-6xl font-bold mb-4">Check-In</h1>
+            <main className="flex flex-col items-center text-center flex-grow w-full">
+                <h1 className="text-4xl font-medium mb-2">Check-In</h1>
                 <p className="text-3xl text-gray-600 mb-20">Enter booking reference code</p>
 
                 <div className="rounded-3xl p-12 w-3/5 flex flex-col items-start mb-4 card-shadow">

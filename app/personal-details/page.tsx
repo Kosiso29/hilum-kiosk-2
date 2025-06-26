@@ -68,10 +68,10 @@ export default function PersonalDetailsPage() {
         <div className="min-h-screen bg-white text-gray-900 flex flex-col items-center p-8">
             <Header />
             <main className="flex flex-col items-center text-center flex-grow">
-                <h1 className="text-6xl font-bold mb-4">Check-In</h1>
-                <p className="text-3xl text-gray-600 mb-20">Enter personal details</p>
-                <div className="rounded-3xl p-12 w-4/5 flex flex-col items-start mb-12 card-shadow">
-                    <h2 className="text-4xl font-semibold mb-8">Personal Details</h2>
+                <h1 className="text-4xl font-medium mb-4">Check-In</h1>
+                <p className="text-3xl text-gray-600 mb-8">Enter personal details</p>
+                <div className="rounded-3xl p-12 w-4/5 flex flex-col items-start mb-4 card-shadow">
+                    <h2 className="text-2xl font-semibold mb-8">Personal Details</h2>
                     <div className="grid grid-cols-2 gap-10 w-full mb-8">
                         <div>
                             <label htmlFor="first-name" className="text-xl font-semibold mb-4 block">First name <span className="text-purple-600">*</span></label>
@@ -117,10 +117,10 @@ export default function PersonalDetailsPage() {
                             />
                         </div>
                     </div>
-                    <p className="text-xl text-gray-600 text-left mt-8">
+                    <p className="text-xl text-gray-600 text-left mt-4">
                         Please enter all sections with a with the asterisk character <span className="font-bold">&quot;*&quot;</span>
                     </p>
-                    <div className="w-full flex justify-center items-center mb-8" style={{ minHeight: 48 }}>
+                    <div className="w-full flex justify-center items-center mt-2" style={{ minHeight: 48 }}>
                         {loading ? (
                             <>
                                 <svg className="animate-spin h-8 w-8 text-purple-500 mr-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -131,7 +131,7 @@ export default function PersonalDetailsPage() {
                             </>
                         ) : null}
                         {error && (
-                            <div className="text-red-500 text-xl mb-8">{error}</div>
+                            <div className="text-red-500 text-xl mt-2">{error}</div>
                         )}
                     </div>
                 </div>
