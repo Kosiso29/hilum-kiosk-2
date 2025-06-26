@@ -61,7 +61,7 @@ export default function VerifyIdentityPage() {
                                 className="px-10 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-2xl text-xl font-semibold shadow-md"
                                 onClick={handleOtherDetailsClick}
                             >
-                                Try using personal details <span className="inline-flex items-center">instead
+                                Try using personal details instead <span className="inline-flex items-center">
                                     <svg className="ml-2 w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
                                     </svg>
@@ -77,7 +77,7 @@ export default function VerifyIdentityPage() {
 
             {/* Sticky footer button group */}
             <div className="w-full bg-white flex space-x-8 items-center justify-center py-4 mt-auto">
-                <Button className="px-12 py-4 border-2 border-purple-500 text-purple-600 rounded-3xl text-2xl font-semibold">
+                <Button className="border-2 border-purple-500 text-purple-600">
                     Need help?
                 </Button>
                 <Button

@@ -25,24 +25,24 @@ export default function CheckinPage() {
                 <h1 className="text-3xl md:text-4xl font-medium mb-4 md:mb-4">or register as walk-in</h1>
                 <p className="text-lg md:text-3xl text-gray-600 mb-8 md:mb-20">Select an option to proceed</p>
 
-                <div className="flex flex-col md:flex-row md:space-x-12 space-y-8 md:space-y-0 mb-8 md:mb-20 w-full justify-center">
+                <div className="flex flex-row md:space-x-12 space-y-8 md:space-y-0 mb-8 md:mb-20 w-full justify-center">
                     {/* Check-In Card */}
                     <div
-                        className="rounded-3xl w-64 h-full flex flex-col justify-center p-4 md:p-8 cursor-pointer transform transition-transform duration-200 hover:scale-105 card-shadow"
+                        className="rounded-3xl w-64 h-full flex flex-col justify-center p-8 cursor-pointer transform transition-transform duration-200 hover:scale-105 card-shadow"
                         onClick={handleCheckinClick}
                     >
-                        <div className="w-32 h-28 md:w-48 md:h-40 bg-[#f5f5f5] rounded-xl mb-4 md:mb-14"></div> {/* Placeholder for image/icon */}
-                        <h2 className="text-2xl md:text-3xl text-left font-medium mb-1 md:mb-2">Check-In</h2>
+                        <div className="w-48 h-40 bg-[#f5f5f5] rounded-xl mb-14"></div> {/* Placeholder for image/icon */}
+                        <h2 className="text-3xl text-left font-medium mb-2">Check-In</h2>
                         <p className="text-base text-left text-gray-600">I have a scheduled appointment</p>
                     </div>
 
                     {/* Walk-In Card */}
                     <div
-                        className="rounded-3xl w-64 h-full flex flex-col justify-center p-4 md:p-8 cursor-pointer transform transition-transform duration-200 hover:scale-105 card-shadow"
+                        className="rounded-3xl w-64 h-full flex flex-col justify-center p-8 cursor-pointer transform transition-transform duration-200 hover:scale-105 card-shadow"
                         onClick={handleWalkinClick}
                     >
-                        <div className="w-32 h-28 md:w-48 md:h-40 bg-[#f5f5f5] rounded-xl mb-4 md:mb-14"></div> {/* Placeholder for image/icon */}
-                        <h2 className="text-2xl md:text-3xl text-left font-medium mb-1 md:mb-2">Walk-In</h2>
+                        <div className="w-48 h-40 bg-[#f5f5f5] rounded-xl mb-14"></div> {/* Placeholder for image/icon */}
+                        <h2 className="text-3xl text-left font-medium mb-2">Walk-In</h2>
                         <p className="text-base text-left text-gray-600">I don&apos;t have an appointment</p>
                     </div>
                 </div>
@@ -56,7 +56,7 @@ export default function CheckinPage() {
             </main>
 
             {/* Sticky footer button group */}
-            <div className="w-full bg-white flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-8 items-center justify-center py-4">
+            <div className="w-full bg-white flex flex-row space-y-0 space-x-8 items-center justify-center py-4">
                 <Button className="px-8 md:px-12 py-4 border-2 border-purple-500 text-purple-600 rounded-3xl text-lg md:text-2xl font-semibold">
                     Need help?
                 </Button>

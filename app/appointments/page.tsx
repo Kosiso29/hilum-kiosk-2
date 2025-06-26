@@ -90,7 +90,7 @@ export default function AppointmentsPage() {
             <main className="flex flex-col items-center text-center flex-grow w-full">
                 {/* Patient Name and Instructions */}
                 <div className="w-full flex flex-col items-center mb-12">
-                    <h2 className="text-4xl font-semibold text-gray-300 mb-2">{bookings[0].patient.firstName ? `${bookings[0].patient.firstName}'s Appointments` : 'Appointments'}</h2>
+                    <h2 className="text-4xl font-semibold text-gray-300 mb-2">{bookings[0]?.patient.firstName ? `${bookings[0]?.patient.firstName}'s Appointments` : 'Appointments'}</h2>
                     <div className="text-xl text-gray-500 mb-1">
                         Tap the <span className="text-purple-500 font-semibold">&ldquo;Check in&rdquo;</span> to select appointments
                     </div>
