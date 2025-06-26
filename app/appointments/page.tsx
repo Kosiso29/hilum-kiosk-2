@@ -8,6 +8,7 @@ import api from '../lib/axios';
 import Button from '../components/Button';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
+import axios from 'axios';
 
 export default function AppointmentsPage() {
     const router = useRouter();
@@ -55,7 +56,11 @@ export default function AppointmentsPage() {
                 setCheckInError((prev) => ({ ...prev, [booking.id]: '' }));
             } catch (error) {
                 let message = 'There was an error with the check-in';
-                if (error instanceof Error) message = error.message;
+                if (axios.isAxiosError(error) && error.response?.data?.message) {
+                    message = error.response.data.message;
+                } else if (error instanceof Error) {
+                    message = error.message;
+                }
                 setCheckInError((prev) => ({ ...prev, [booking.id]: message }));
                 allSucceeded = false;
             } finally {
