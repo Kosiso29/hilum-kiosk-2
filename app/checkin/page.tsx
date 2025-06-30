@@ -91,17 +91,19 @@ export default function CheckinPage() {
                 <h1 className="text-4xl font-medium mb-2">Check-In</h1>
                 <p className="text-3xl text-gray-600 mb-20">Enter booking reference code</p>
 
-                <div className="rounded-3xl p-12 w-3/5 flex flex-col items-start mb-4 card-shadow">
-                    <label htmlFor="reference-code" className="text-3xl font-semibold mb-6">Reference Code</label>
-                    <Input
-                        type="text"
-                        id="reference-code"
-                        placeholder="############"
-                        className="w-full p-6 text-4xl border-2 border-gray-300 rounded-xl mb-6 focus:outline-none focus:border-purple-500"
-                        value={referenceCode}
-                        onChange={handleReferenceCodeChange}
-                        disabled={loading}
-                    />
+                <div className="rounded-3xl p-12 py-24 flex flex-col min-w-3/5 items-start mb-4 card-shadow">
+                    <div className="flex flex-col items-start w-[65%] min-w-[20rem]">
+                        <label htmlFor="reference-code" className="text-3xl font-semibold mb-6">Reference Code</label>
+                        <Input
+                            type="text"
+                            id="reference-code"
+                            placeholder="############"
+                            className="mb-6"
+                            value={referenceCode}
+                            onChange={handleReferenceCodeChange}
+                            disabled={loading}
+                        />
+                    </div>
                     {errorMessage && <p className="text-red-500 text-xl mt-2">{errorMessage}</p>}
                     <p className="text-xl text-gray-600 text-left mt-4">
                         Find the reference code in your appointment

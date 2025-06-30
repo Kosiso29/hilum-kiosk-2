@@ -98,7 +98,6 @@ export default function PersonalDetailsPage() {
                                 type="text"
                                 id="first-name"
                                 placeholder="Enter first name ..."
-                                className="w-full p-5 text-2xl border-2 border-gray-300 rounded-xl focus:outline-none focus:border-purple-500"
                                 value={firstName}
                                 onChange={(e) => setFirstName(e.target.value)}
                             />
@@ -109,7 +108,6 @@ export default function PersonalDetailsPage() {
                                 type="text"
                                 id="last-name"
                                 placeholder="Enter last name ..."
-                                className="w-full p-5 text-2xl border-2 border-gray-300 rounded-xl focus:outline-none focus:border-purple-500"
                                 value={lastName}
                                 onChange={(e) => setLastName(e.target.value)}
                             />
@@ -121,7 +119,7 @@ export default function PersonalDetailsPage() {
                             <DatePicker
                                 date={dateOfBirth}
                                 setDate={setDateOfBirth}
-                                className="w-full p-5 text-2xl border-2 border-gray-300 rounded-xl focus:outline-none focus:border-purple-500"
+                                className="text-2xl"
                             />
                         </div>
                         <div>
@@ -130,7 +128,6 @@ export default function PersonalDetailsPage() {
                                 type="text"
                                 id="healthcare-number"
                                 placeholder="Enter healthcare number ..."
-                                className="w-full p-5 text-2xl border-2 border-gray-300 rounded-xl focus:outline-none focus:border-purple-500"
                                 value={healthcareNumber}
                                 onChange={(e) => setHealthcareNumber(e.target.value)}
                             />
