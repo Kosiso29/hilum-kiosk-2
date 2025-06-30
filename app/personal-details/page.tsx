@@ -158,17 +158,15 @@ export default function PersonalDetailsPage() {
             {/* Sticky footer button group */}
             <div className="w-full bg-white flex space-x-8 items-center justify-center py-4">
                 <Button
-                    className="px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-3xl text-2xl font-semibold"
                     onClick={handleBackClick}
                     disabled={loading}
                 >
                     Back
                 </Button>
-                <Button className="px-12 py-4 border-2 border-purple-500 text-purple-600 rounded-3xl text-2xl font-semibold" disabled={loading}>
+                <Button variant="secondary" disabled={loading}>
                     Need help?
                 </Button>
                 <Button
-                    className="px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-3xl text-2xl font-semibold flex items-center"
                     onClick={handleNextClick}
                     disabled={loading}
                 >

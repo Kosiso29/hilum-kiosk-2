@@ -56,11 +56,11 @@ export default function CheckinPage() {
             </main>
 
             {/* Sticky footer button group */}
-            <div className="w-full bg-white flex flex-row space-y-0 space-x-8 items-center justify-center py-4">
-                <Button className="px-8 md:px-12 py-4 border-2 border-purple-500 text-purple-600 rounded-3xl text-lg md:text-2xl font-semibold">
+            <div className="w-full bg-white flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-8 items-center justify-center py-4">
+                <Button variant="secondary" className="text-lg md:text-2xl">
                     Need help?
                 </Button>
-                <Button className="px-8 md:px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-3xl text-lg md:text-2xl font-semibold flex items-center">
+                <Button className="text-lg md:text-2xl">
                     Next
                     <svg className="ml-2 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
