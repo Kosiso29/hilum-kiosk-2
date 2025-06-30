@@ -91,24 +91,35 @@ export default function CheckinPage() {
                 <h1 className="text-4xl font-medium mb-2">Check-In</h1>
                 <p className="text-3xl text-gray-600 mb-20">Enter booking reference code</p>
 
-                <div className="rounded-3xl p-12 py-24 flex flex-col min-w-3/5 items-start mb-4 card-shadow">
-                    <div className="flex flex-col items-start w-[65%] min-w-[20rem]">
-                        <label htmlFor="reference-code" className="text-3xl font-semibold mb-6">Reference Code</label>
-                        <Input
-                            type="text"
-                            id="reference-code"
-                            placeholder="############"
-                            className="mb-6"
-                            value={referenceCode}
-                            onChange={handleReferenceCodeChange}
-                            disabled={loading}
-                        />
+                <div className='min-w-3/5 max-w-[50rem]'>
+                    <div className="rounded-3xl p-12 py-24 flex flex-col items-start mb-8 card-shadow">
+                        <div className="flex flex-col items-start w-[65%] min-w-[20rem]">
+                            <label htmlFor="reference-code" className="text-3xl font-semibold mb-6">Reference Code</label>
+                            <Input
+                                type="text"
+                                id="reference-code"
+                                placeholder="############"
+                                className="mb-6"
+                                value={referenceCode}
+                                onChange={handleReferenceCodeChange}
+                                disabled={loading}
+                            />
+                        </div>
+                        {errorMessage && <p className="text-red-500 text-xl mt-2">{errorMessage}</p>}
+                        <p className="text-xl text-gray-600 text-left mt-4">
+                            Find the reference code in your appointment
+                            <span className="font-semibold"> email</span> or <span className="font-semibold">text</span>
+                        </p>
                     </div>
-                    {errorMessage && <p className="text-red-500 text-xl mt-2">{errorMessage}</p>}
-                    <p className="text-xl text-gray-600 text-left mt-4">
-                        Find the reference code in your appointment
-                        <span className="font-semibold"> email</span> or <span className="font-semibold">text</span>
-                    </p>
+
+                    <div className="flex justify-end w-full">
+                        <Button
+                            className="px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-3xl text-2xl font-semibold mb-8"
+                            onClick={handleNoCodeClick}
+                        >
+                            I don&apos;t have a code
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="relative h-20 w-full mb-2">
@@ -122,16 +133,6 @@ export default function CheckinPage() {
                         </div>
                     )}
                 </div>
-
-                <Button
-                    className="px-12 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-3xl text-2xl font-semibold mb-8"
-                    onClick={handleNoCodeClick}
-                >
-                    I don&apos;t have a code
-                </Button>
-                <p className="text-xl text-gray-600 mb-20">
-                    <span className="font-bold">We can get the booking using your other personal details.</span>
-                </p>
             </main>
 
             {/* Sticky footer button group */}
