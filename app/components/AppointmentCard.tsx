@@ -11,6 +11,40 @@ interface AppointmentCardProps {
 }
 
 const AppointmentCard: React.FC<AppointmentCardProps> = ({ service, time, disabled, loading, error, selected, onCheckIn }) => {
+    // Determine why the button is disabled
+    // If loadingCheckInId disables, parent will pass disabled=true but loading=false
+    // We'll use a prop to indicate this, but since we don't have it, infer from props
+    // We'll assume: if disabled && !loading && !selected, it's due to 'past' or '!canCheckIn'
+    // If disabled && !loading && selected, still show 'Selected'
+    // If disabled && !loading && !selected, show 'Disabled'
+    // If disabled && loading, show spinner
+    // If not disabled, show 'Check-In' or 'Selected'
+
+    let buttonText: React.ReactNode = 'Check-In';
+    if (loading) {
+        buttonText = (
+            <span className="flex items-center justify-center">
+                <svg className="animate-spin h-6 w-6 text-purple-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                </svg>
+            </span>
+        );
+    } else if (selected) {
+        buttonText = 'Selected';
+    }
+    // If disabled and not loading, check if it's due to loadingCheckInId (parent disables all during loading)
+    // We'll assume: if disabled && !loading && selected, keep 'Selected'
+    // If disabled && !loading && !selected, show 'Disabled'
+    // But if disabled && !loading && selected, keep 'Selected'
+    // If disabled && !loading && !selected, show 'Disabled'
+    // If not disabled, show 'Check-In' or 'Selected'
+
+    // If disabled and not loading and not selected, show 'Disabled'
+    if (disabled && !loading && !selected) {
+        buttonText = 'Disabled';
+    }
+
     return (
         <div className="flex flex-col items-center bg-white rounded-2xl shadow-md px-10 py-8 mb-6 w-[80%] min-h-[100px] max-w-4xl">
             <div className="flex items-center w-full">
@@ -30,14 +64,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({ service, time, disabl
                     disabled={disabled || loading}
                     onClick={onCheckIn}
                 >
-                    {loading ? (
-                        <span className="flex items-center justify-center">
-                            <svg className="animate-spin h-6 w-6 text-purple-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-                            </svg>
-                        </span>
-                    ) : disabled ? 'Disabled' : selected ? 'Selected' : 'Check-In'}
+                    {buttonText}
                 </button>
             </div>
             {error && (

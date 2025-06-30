@@ -46,8 +46,22 @@ export default function CheckinPage() {
             }
 
             const bookings: Booking[] = response.data;
-            if (bookings.length > 0) {
-                dispatch(setBookings(bookings));
+            const today = new Date();
+            const todaysBookings = bookings.filter(booking => {
+                const bookingDate = new Date(booking.startTimeStamp);
+                return bookingDate.getFullYear() === today.getFullYear() &&
+                    bookingDate.getMonth() === today.getMonth() &&
+                    bookingDate.getDate() === today.getDate();
+            });
+
+            if (todaysBookings.length === 0) {
+                setErrorMessage("We found your booking, but it is not scheduled for today. Kindly pick a booking scheduled for today.");
+                setLoading(false);
+                return;
+            }
+
+            if (todaysBookings.length > 0) {
+                dispatch(setBookings(todaysBookings));
                 // Only pass bookingReference in the query
                 const query = new URLSearchParams({
                     bookingReference: referenceCode

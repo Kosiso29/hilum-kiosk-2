@@ -10,6 +10,7 @@ import { format } from 'date-fns';
 import { useDispatch } from 'react-redux';
 import { setBookings } from '../store/bookingSlice';
 import api from '../lib/axios';
+import { Booking } from '@/types/Booking';
 
 export default function PersonalDetailsPage() {
     const [firstName, setFirstName] = useState('');
@@ -41,17 +42,35 @@ export default function PersonalDetailsPage() {
                 nexusNumber: process.env.NEXT_PUBLIC_NEXUS_NUMBER || '6473603374',
             });
             const response = await api.get(`slots/booking?${params}`);
-            if (!response.data || response.data.length === 0) {
+
+            if (response.data && typeof response.data === 'object' && !Array.isArray(response.data) && 'message' in response.data) {
+                setError(response.data.message);
+                setLoading(false);
+                return;
+            }
+
+            if (!response.data || !Array.isArray(response.data) || response.data.length === 0) {
                 setError('No bookings found for the provided details.');
                 setLoading(false);
                 return;
             }
-            if (response.data && typeof response.data === 'object' && 'message' in response.data && response.data.message === 'No patient found against these details') {
-                setError('No patient found against these details');
+
+            const bookings: Booking[] = response.data;
+            const today = new Date();
+            const todaysBookings = bookings.filter(booking => {
+                const bookingDate = new Date(booking.startTimeStamp);
+                return bookingDate.getFullYear() === today.getFullYear() &&
+                    bookingDate.getMonth() === today.getMonth() &&
+                    bookingDate.getDate() === today.getDate();
+            });
+
+            if (todaysBookings.length === 0) {
+                setError("We found your details, but there are no appointments scheduled for today. Kindly pick a booking scheduled for today.");
                 setLoading(false);
                 return;
             }
-            dispatch(setBookings(response.data));
+
+            dispatch(setBookings(todaysBookings));
             router.push('/appointments');
         } catch (error: unknown) {
             if (error instanceof Error) {
@@ -70,7 +89,7 @@ export default function PersonalDetailsPage() {
             <main className="flex flex-col items-center text-center flex-grow">
                 <h1 className="text-4xl font-medium mb-4">Check-In</h1>
                 <p className="text-3xl text-gray-600 mb-8">Enter personal details</p>
-                <div className="rounded-3xl p-12 w-4/5 flex flex-col items-start mb-4 card-shadow">
+                <div className="rounded-3xl p-12 max-w-[50rem] flex flex-col items-start mb-4 card-shadow text-left">
                     <h2 className="text-2xl font-semibold mb-8">Personal Details</h2>
                     <div className="grid grid-cols-2 gap-10 w-full mb-8">
                         <div>
@@ -131,7 +150,7 @@ export default function PersonalDetailsPage() {
                             </>
                         ) : null}
                         {error && (
-                            <div className="text-red-500 text-xl mt-2">{error}</div>
+                            <div className="text-red-500 text-xl mt-2 text-center max-w-full">{error}</div>
                         )}
                     </div>
                 </div>
