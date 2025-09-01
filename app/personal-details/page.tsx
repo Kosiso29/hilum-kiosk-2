@@ -11,6 +11,7 @@ import { useDispatch } from 'react-redux';
 import { setBookings } from '../store/bookingSlice';
 import api from '../lib/axios';
 import { Booking } from '@/types/Booking';
+import { NEXUS_NUMBER } from '../lib/config';
 
 export default function PersonalDetailsPage() {
     const [firstName, setFirstName] = useState('');
@@ -39,7 +40,7 @@ export default function PersonalDetailsPage() {
                 lastName,
                 patientDOB: dateOfBirth ? format(dateOfBirth, 'yyyy-MM-dd') : '',
                 ...(healthcareNumber && { healthCard: healthcareNumber }),
-                nexusNumber: process.env.NEXT_PUBLIC_NEXUS_NUMBER || '6473603374',
+                nexusNumber: NEXUS_NUMBER,
             });
             const response = await api.get(`slots/booking?${params}`);
 

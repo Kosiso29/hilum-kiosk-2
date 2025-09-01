@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { API_BASE_URL } from './config';
 
 const api = axios.create({
-    baseURL: 'https://staging.telelink.wosler.ca/api/',
+    baseURL: API_BASE_URL,
     // You can add headers or interceptors here if needed
 });
 

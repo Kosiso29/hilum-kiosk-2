@@ -9,8 +9,7 @@ import Button from '../components/Button';
 import Input from '../components/Input';
 import { useDispatch } from 'react-redux';
 import { setBookings } from '../store/bookingSlice';
-
-const NEXUS_NUMBER = process.env.NEXT_PUBLIC_NEXUS_NUMBER || '6473603374';
+import { NEXUS_NUMBER } from '../lib/config';
 
 export default function CheckinPage() {
     const [referenceCode, setReferenceCode] = useState('');

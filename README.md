@@ -28,7 +28,21 @@ Make sure you have [Node.js](https://nodejs.org/) installed (preferably version 
 npm install
 ```
 
-### 3. Run the Development Server
+### 3. Environment Configuration
+
+Create a `.env.local` file in the root directory with the following variables:
+
+```bash
+# Nexus Number for clinic identification
+NEXT_PUBLIC_NEXUS_NUMBER=6473603374
+
+# API Configuration (optional - defaults to staging)
+NEXT_PUBLIC_API_BASE_URL=https://staging.telelink.wosler.ca/api/
+```
+
+**Note**: The `.env.local` file is ignored by git for security. Copy the values from `.env.example` if available.
+
+### 4. Run the Development Server
 
 ```bash
 npm run dev

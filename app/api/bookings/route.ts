@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { mockBookings } from '@/app/lib/mockBookings';
 import { Booking } from '@/types/Booking';
+import { NEXUS_NUMBER } from '@/app/lib/config';
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -15,7 +16,7 @@ export async function GET(request: Request) {
     if (bookingReference) {
         try {
             const response = await fetch(
-                `https://staging.telelink.wosler.ca/api/slots/booking?bookingReference=${bookingReference}&nexusNumber=6473603374`
+                `https://staging.telelink.wosler.ca/api/slots/booking?bookingReference=${bookingReference}&nexusNumber=${NEXUS_NUMBER}`
             );
 
             if (!response.ok) {
