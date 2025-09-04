@@ -44,7 +44,7 @@ export default function CheckinPage() {
                 return;
             }
 
-            if (typeof response.data === 'object') {
+            if (typeof response.data?.message === 'string') {
                 setErrorMessage(response.data?.message || 'Sorry, we cannot find the booking reference. We can get the booking using your other personal details');
                 setLoading(false);
                 return;
