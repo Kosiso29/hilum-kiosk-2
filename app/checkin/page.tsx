@@ -44,6 +44,12 @@ export default function CheckinPage() {
                 return;
             }
 
+            if (typeof response.data === 'object') {
+                setErrorMessage(response.data?.message || 'Sorry, we cannot find the booking reference. We can get the booking using your other personal details');
+                setLoading(false);
+                return;
+            }
+
             const bookings: Booking[] = response.data;
             const today = new Date();
             const todaysBookings = bookings.filter(booking => {
