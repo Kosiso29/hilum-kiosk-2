@@ -39,7 +39,7 @@ export default function PersonalDetailsPage() {
                 firstName,
                 lastName,
                 patientDOB: dateOfBirth ? format(dateOfBirth, 'yyyy-MM-dd') : '',
-                ...(healthcareNumber && { healthCard: healthcareNumber }),
+                ...(healthcareNumber && { patientHCN: healthcareNumber }),
                 nexusNumber: NEXUS_NUMBER,
             });
             const response = await api.get(`slots/booking?${params}`);
