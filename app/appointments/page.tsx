@@ -4,10 +4,12 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/app/components/Header';
 import AppointmentCard from '../components/AppointmentCard';
+import RequisitionQRCode from '../components/RequisitionQRCode';
 import api from '../lib/axios';
 import Button from '../components/Button';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
+import { NEXUS_NUMBER } from '../lib/config';
 import axios from 'axios';
 
 export default function AppointmentsPage() {
@@ -17,16 +19,11 @@ export default function AppointmentsPage() {
     const [loadingCheckInId, setLoadingCheckInId] = useState<number | null>(null);
     const [checkInError, setCheckInError] = useState<{ [id: number]: string }>({});
     const [selected, setSelected] = useState<number[]>([]);
+    const [showQRCode, setShowQRCode] = useState(false);
+    const [qrBookingRef, setQrBookingRef] = useState<string>('');
 
-    const handleSelect = (id: number, disabled: boolean, canCheckIn?: boolean) => {
+    const handleSelect = (id: number, disabled: boolean) => {
         if (disabled) return;
-        if (canCheckIn === false) {
-            setCheckInError((prev) => ({
-                ...prev,
-                [id]: 'You can only check in within 30 minutes before and up to 10 minutes after your appointment.'
-            }));
-            return;
-        }
         setCheckInError((prev) => ({ ...prev, [id]: '' }));
         setSelected((prev) => {
             if (prev.includes(id)) {
@@ -47,6 +44,35 @@ export default function AppointmentsPage() {
         for (const id of selected) {
             const booking = bookings.find((b) => b.id === id);
             if (!booking) continue;
+
+            // Check current requisition status from API
+            try {
+                const params = new URLSearchParams({
+                    bookingReference: booking.bookingReference,
+                    nexusNumber: NEXUS_NUMBER
+                });
+                const response = await api.get(`slots/booking?${params}`);
+
+                if (response.data && response.data.length > 0) {
+                    const currentBooking = response.data[0];
+                    if (!currentBooking.requisitionUploadStatus || !currentBooking.referringDoctorStatus) {
+                        setQrBookingRef(booking.bookingReference);
+                        setShowQRCode(true);
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking requisition status:', error);
+                // If API call fails, use cached data as fallback
+                if (!booking.requisitionUploadStatus || !booking.referringDoctorStatus) {
+                    setCheckInError((prev) => ({
+                        ...prev,
+                        [booking.id]: 'Requisition upload status check failed'
+                    }));
+                    return;
+                }
+            }
+
             setLoadingCheckInId(booking.id);
             try {
                 // Call the new check-in API endpoint
@@ -87,6 +113,25 @@ export default function AppointmentsPage() {
         console.log("Need help clicked");
     };
 
+    const handleCloseQRCode = () => {
+        setShowQRCode(false);
+        setQrBookingRef('');
+    };
+
+    // Show QR code content if needed
+    if (showQRCode && qrBookingRef) {
+        return (
+            <div className="min-h-screen bg-white text-gray-900 flex flex-col items-center p-8">
+                <Header />
+                <RequisitionQRCode
+                    bookingRef={qrBookingRef}
+                    onClose={handleCloseQRCode}
+                />
+            </div>
+        );
+    }
+
+    // Show normal appointments content
     return (
         <div className="min-h-screen bg-white text-gray-900 flex flex-col items-center p-8">
             <Header />
@@ -105,16 +150,6 @@ export default function AppointmentsPage() {
                 {bookings.length > 0 && (
                     <div className="flex flex-col items-center w-full">
                         {bookings.map((booking) => {
-                            const now = new Date();
-                            const start = new Date(booking.startTimeStamp);
-                            const end = new Date(booking.endTimeStamp);
-                            const diffToStart = (start.getTime() - now.getTime()) / 60000; // minutes until start
-                            const diffFromStart = (now.getTime() - start.getTime()) / 60000; // minutes after start
-                            const canCheckIn =
-                                diffToStart <= 30 && // within 30 min before
-                                diffFromStart <= 10 && // not more than 10 min late
-                                diffToStart <= 30 && diffToStart >= -10; // between -10 and 30 min
-                            const past = end < now;
                             const isSelected = selected.includes(booking.id);
 
                             // Extract the time portion (HH:mm) from the ISO string directly
@@ -131,11 +166,11 @@ export default function AppointmentsPage() {
                                     key={booking.id}
                                     service={booking.service.service}
                                     time={`${startTime} - ${endTime}`}
-                                    disabled={past || loadingCheckInId !== null || !canCheckIn}
+                                    disabled={loadingCheckInId !== null}
                                     loading={loadingCheckInId === booking.id}
                                     error={checkInError[booking.id]}
                                     selected={isSelected}
-                                    onCheckIn={canCheckIn && !past && !loadingCheckInId ? () => handleSelect(booking.id, false, true) : undefined}
+                                    onCheckIn={!loadingCheckInId ? () => handleSelect(booking.id, false) : undefined}
                                 />
                             );
                         })}

@@ -28,4 +28,6 @@ export interface Booking {
     };
     operator: { name: string };
     bookingReference: string;
+    requisitionUploadStatus: boolean;
+    referringDoctorStatus: boolean;
 } 
