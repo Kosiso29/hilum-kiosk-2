@@ -7,6 +7,12 @@ export default function KioskIdleOverlay() {
     const pathname = usePathname();
 
     const resetIdleTimer = useCallback(() => {
+        // Don't set idle timer on login page
+        if (pathname === "/login") {
+            if (timer.current) clearTimeout(timer.current);
+            return;
+        }
+
         if (timer.current) clearTimeout(timer.current);
         timer.current = setTimeout(() => {
             if (pathname !== "/") {

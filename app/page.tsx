@@ -1,11 +1,14 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/app/store';
 import Header from '@/app/components/Header';
 import Button from './components/Button';
 
 export default function Home() {
   const router = useRouter();
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
 
   const handleTapToBegin = () => {
     router.push('/entry');

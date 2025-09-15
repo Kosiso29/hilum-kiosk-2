@@ -2,12 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import { useDispatch } from 'react-redux';
+import { clearSession } from '@/app/store/authSlice';
+import { AppDispatch } from '@/app/store';
 
 export default function Header() {
     const [currentTime, setCurrentTime] = useState('');
     const [currentDate, setCurrentDate] = useState('');
     const router = useRouter();
+    const pathname = usePathname();
+    const dispatch = useDispatch<AppDispatch>();
 
     useEffect(() => {
         const updateDateTime = () => {
@@ -22,6 +27,27 @@ export default function Header() {
         return () => clearInterval(timerId); // Clean up on unmount
     }, []);
 
+
+    const handleLogout = async () => {
+        // Clear session from Redux store
+        dispatch(clearSession());
+
+        // Clear session token cookie using fetch to ensure proper clearing
+        try {
+            await fetch('/api/auth/logout', {
+                method: 'POST',
+                credentials: 'include',
+            });
+        } catch (error) {
+            console.error('Logout API error:', error);
+            // Fallback: try to clear cookie manually
+            document.cookie = 'session-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; httpOnly=false; secure=false; sameSite=strict';
+        }
+
+        // Redirect to login
+        router.push('/login');
+    };
+
     return (
         <header className="w-full flex justify-between items-center mb-16">
             <div className="flex items-end space-x-2 text-4xl font-normal">
@@ -35,16 +61,34 @@ export default function Header() {
                     {currentDate.split(' ')[0]}
                 </div>
             </div>
-            <div
-                className="flex items-center cursor-pointer select-none"
-                onClick={() => router.push('/')}
-                title="Go to Home"
-            >
-                <Image src="/logo.png" alt="Wosler Diagnostics Logo" width={60} height={60} className="mr-4" />
-                <span className="flex flex-col">
-                    <span className="text-3xl font-bold">Wosler</span>
-                    <span className="text-xl font-normal ml-1">DIAGNOSTICS</span>
-                </span>
+            <div className="flex items-center space-x-4">
+                {/* Logo */}
+                <div
+                    className="flex items-center cursor-pointer select-none"
+                    onClick={() => router.push('/')}
+                    title="Go to Home"
+                >
+                    <Image src="/logo.png" alt="Wosler Diagnostics Logo" width={60} height={60} className="mr-4" />
+                    <span className="flex flex-col">
+                        <span className="text-3xl font-bold">Wosler</span>
+                        <span className="text-xl font-normal ml-1">DIAGNOSTICS</span>
+                    </span>
+                </div>
+
+                {/* Divider - only show on non-login pages */}
+                {pathname !== '/login' && (
+                    <div className="h-16 w-px bg-gray-300"></div>
+                )}
+
+                {/* Logout Button - show on all pages except login */}
+                {pathname !== '/login' && (
+                    <button
+                        onClick={handleLogout}
+                        title="Logout"
+                    >
+                        Logout
+                    </button>
+                )}
             </div>
         </header>
     );
