@@ -6,6 +6,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { clearSession } from '@/app/store/authSlice';
 import { AppDispatch } from '@/app/store';
+import { idleTimerManager } from '@/app/lib/idleTimerManager';
 
 export default function Header() {
     const [currentTime, setCurrentTime] = useState('');
@@ -34,12 +35,17 @@ export default function Header() {
 
         // Clear session token cookie using fetch to ensure proper clearing
         try {
+            // Pause idle timer during logout API call
+            idleTimerManager.startApiCall();
             await fetch('/api/auth/logout', {
                 method: 'POST',
                 credentials: 'include',
             });
+            idleTimerManager.endApiCall();
         } catch (error) {
             console.error('Logout API error:', error);
+            // Ensure timer is resumed even if API call fails
+            idleTimerManager.endApiCall();
             // Fallback: try to clear cookie manually
             document.cookie = 'session-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; httpOnly=false; secure=false; sameSite=strict';
         }

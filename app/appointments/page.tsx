@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/app/components/Header';
 import AppointmentCard from '../components/AppointmentCard';
@@ -10,6 +10,7 @@ import Button from '../components/Button';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { NEXUS_NUMBER } from '../lib/config';
+import { idleTimerManager } from '../lib/idleTimerManager';
 import axios from 'axios';
 
 export default function AppointmentsPage() {
@@ -22,8 +23,33 @@ export default function AppointmentsPage() {
     const [showQRCode, setShowQRCode] = useState(false);
     const [qrBookingRef, setQrBookingRef] = useState<string>('');
 
-    const handleSelect = (id: number, disabled: boolean) => {
+    // Manage idle timer based on QR code dialog state
+    useEffect(() => {
+        if (showQRCode) {
+            // Pause idle timer when QR code dialog is shown
+            idleTimerManager.pause();
+        } else {
+            // Resume idle timer when QR code dialog is closed
+            idleTimerManager.resume();
+        }
+
+        // Cleanup: ensure timer is resumed when component unmounts
+        return () => {
+            if (showQRCode) {
+                idleTimerManager.resume();
+            }
+        };
+    }, [showQRCode]);
+
+    const handleSelect = (id: number, disabled: boolean, canCheckIn?: boolean) => {
         if (disabled) return;
+        if (canCheckIn === false) {
+            setCheckInError((prev) => ({
+                ...prev,
+                [id]: 'You can only check in within 30 minutes before and up to 10 minutes after your appointment.'
+            }));
+            return;
+        }
         setCheckInError((prev) => ({ ...prev, [id]: '' }));
         setSelected((prev) => {
             if (prev.includes(id)) {
@@ -116,6 +142,7 @@ export default function AppointmentsPage() {
     const handleCloseQRCode = () => {
         setShowQRCode(false);
         setQrBookingRef('');
+        // Note: idle timer will automatically resume via useEffect when showQRCode changes to false
     };
 
     // Show QR code content if needed
@@ -150,6 +177,16 @@ export default function AppointmentsPage() {
                 {bookings.length > 0 && (
                     <div className="flex flex-col items-center w-full">
                         {bookings.map((booking) => {
+                            const now = new Date();
+                            const start = new Date(booking.startTimeStamp);
+                            const end = new Date(booking.endTimeStamp);
+                            const diffToStart = (start.getTime() - now.getTime()) / 60000; // minutes until start
+                            const diffFromStart = (now.getTime() - start.getTime()) / 60000; // minutes after start
+                            const canCheckIn =
+                                diffToStart <= 30 && // within 30 min before
+                                diffFromStart <= 10 && // not more than 10 min late
+                                diffToStart <= 30 && diffToStart >= -10; // between -10 and 30 min
+                            const past = end < now;
                             const isSelected = selected.includes(booking.id);
 
                             // Extract the time portion (HH:mm) from the ISO string directly
@@ -166,11 +203,11 @@ export default function AppointmentsPage() {
                                     key={booking.id}
                                     service={booking.service.service}
                                     time={`${startTime} - ${endTime}`}
-                                    disabled={loadingCheckInId !== null}
+                                    disabled={past || loadingCheckInId !== null || !canCheckIn}
                                     loading={loadingCheckInId === booking.id}
                                     error={checkInError[booking.id]}
                                     selected={isSelected}
-                                    onCheckIn={!loadingCheckInId ? () => handleSelect(booking.id, false) : undefined}
+                                    onCheckIn={canCheckIn && !past && !loadingCheckInId ? () => handleSelect(booking.id, false, true) : undefined}
                                 />
                             );
                         })}
