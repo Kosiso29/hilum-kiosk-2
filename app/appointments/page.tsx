@@ -41,7 +41,7 @@ export default function AppointmentsPage() {
         };
     }, [showQRCode]);
 
-    const handleSelect = (id: number, disabled: boolean, canCheckIn?: boolean) => {
+    const handleSelect = (id: number, disabled: boolean) => {
         if (disabled) return;
         setCheckInError((prev) => ({ ...prev, [id]: '' }));
         setSelected((prev) => {
