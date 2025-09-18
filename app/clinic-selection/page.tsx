@@ -94,8 +94,8 @@ export default function ClinicSelectionPage() {
             // Save clinic data to IndexedDB
             await saveClinicData(selectedClinic);
 
-            // Navigate to the entry page after clinic selection
-            router.push('/entry');
+            // Navigate to the home page after clinic selection
+            router.push('/');
         } catch (error) {
             console.error('Failed to save clinic data:', error);
             setError('Failed to save clinic selection. Please try again.');

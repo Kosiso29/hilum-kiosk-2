@@ -27,11 +27,11 @@ export default function Home() {
 
     const hasClinicData = await isDataAvailable();
 
-    // Check if a clinic is selected, if not redirect to clinic selection
+    // Check if a clinic is selected, if not redirect to logout
     if (!hasClinicData) {
-      router.push('/clinic-selection');
+      window.location.href = '/logout';
     } else {
-      router.push('/entry');
+      router.push('/checkin');
     }
   };
 
@@ -66,19 +66,22 @@ export default function Home() {
               Wosler<br />Diagnostics
             </h1>
             <p className="text-xl text-gray-500 mt-8">
-              Checking in for your appointment or<br />registering as walk-in?
+              Check in your appointment
             </p>
           </main>
           {/* Button centered at the bottom */}
-          <div className="absolute bottom-20 flex justify-center w-full mt-auto mb-12">
-            <div className="homepage-gradient-border-wrapper">
+          <div className="absolute bottom-10 flex flex-col items-center w-full mt-auto mb-12">
+            <div className="homepage-gradient-border-wrapper mb-10">
               <Button
                 className="homepage-gradient-btn text-xl font-medium px-12 py-4 rounded-full transform transition-transform duration-200 active:scale-95"
                 onClick={handleTapToBegin}
               >
-                Tap anywhere to begin
+                Tap anywhere to Check In
               </Button>
             </div>
+            <p className="text-sm text-gray-500 text-center max-w-md">
+              For walk-in or any other questions, please call the receptionist or contact us at <span className="font-medium">+1 (647) 691-6053</span>
+            </p>
           </div>
         </div>
       </div>

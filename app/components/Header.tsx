@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-// Removed imports for logout functionality - now handled by /logout page
+import { clinicStorage } from '@/app/lib/clinicStorage';
 
 export default function Header() {
     const [currentTime, setCurrentTime] = useState('');
@@ -21,6 +21,30 @@ export default function Header() {
         const timerId = setInterval(updateDateTime, 60000); // Update every minute
 
         return () => clearInterval(timerId); // Clean up on unmount
+    }, []);
+
+    // Simple IndexedDB data validation - logout if clinic data is corrupted or missing
+    useEffect(() => {
+        const checkClinicData = async () => {
+            try {
+                const nexusNumber = await clinicStorage.getNexusNumber();
+                if (!nexusNumber) {
+                    console.log('No clinic data found - redirecting to logout');
+                    window.location.href = '/logout';
+                }
+            } catch (error) {
+                console.error('Clinic data validation failed:', error);
+                window.location.href = '/logout';
+            }
+        };
+
+        // Only check on pages that require clinic data (not login, logout, or clinic selection pages)
+        if (typeof window !== 'undefined' &&
+            !window.location.pathname.includes('/login') &&
+            !window.location.pathname.includes('/logout') &&
+            !window.location.pathname.includes('/clinic-selection')) {
+            checkClinicData();
+        }
     }, []);
 
     return (

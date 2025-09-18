@@ -20,11 +20,27 @@ export default function PersonalDetailsPage() {
     const [healthcareNumber, setHealthcareNumber] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [showKeyboardButtons, setShowKeyboardButtons] = useState(false);
     const router = useRouter();
     const dispatch = useDispatch();
 
     const handleBackClick = () => {
         router.back();
+    };
+
+    const handleInputFocus = () => {
+        setShowKeyboardButtons(true);
+    };
+
+    const handleInputBlur = (event: React.FocusEvent) => {
+        // Add a small delay to allow button clicks to register before hiding the buttons
+        setTimeout(() => {
+            // Check if the new focused element is a button or inside a button
+            const target = event.relatedTarget as HTMLElement;
+            if (!target || (!target.closest('button') && target.tagName !== 'BUTTON')) {
+                setShowKeyboardButtons(false);
+            }
+        }, 150);
     };
 
     const handleNextClick = async () => {
@@ -102,6 +118,8 @@ export default function PersonalDetailsPage() {
                                 placeholder="Enter first name ..."
                                 value={firstName}
                                 onChange={(e) => setFirstName(e.target.value)}
+                                onFocus={handleInputFocus}
+                                onBlur={handleInputBlur}
                             />
                         </div>
                         <div>
@@ -112,6 +130,8 @@ export default function PersonalDetailsPage() {
                                 placeholder="Enter last name ..."
                                 value={lastName}
                                 onChange={(e) => setLastName(e.target.value)}
+                                onFocus={handleInputFocus}
+                                onBlur={handleInputBlur}
                             />
                         </div>
                     </div>
@@ -134,6 +154,8 @@ export default function PersonalDetailsPage() {
                                 onChange={(e) => setHealthcareNumber(e.target.value)}
                                 pattern="[0-9]*"
                                 inputMode="numeric"
+                                onFocus={handleInputFocus}
+                                onBlur={handleInputBlur}
                             />
                         </div>
                     </div>
@@ -155,28 +177,55 @@ export default function PersonalDetailsPage() {
                         )}
                     </div>
                 </div>
+
+                {
+                    showKeyboardButtons && (
+                        <div className="w-full bg-white flex space-x-8 items-center justify-center py-4">
+                            <Button
+                                onClick={handleBackClick}
+                                disabled={loading}
+                            >
+                                Back
+                            </Button>
+                            <Button variant="secondary" disabled={loading}>
+                                Need help?
+                            </Button>
+                            <Button
+                                onClick={handleNextClick}
+                                disabled={loading}
+                            >
+                                Next
+                                <svg className="ml-2 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </Button>
+                        </div>
+                    )
+                }
             </main>
-            {/* Sticky footer button group */}
-            <div className="w-full bg-white flex space-x-8 items-center justify-center py-4">
-                <Button
-                    onClick={handleBackClick}
-                    disabled={loading}
-                >
-                    Back
-                </Button>
-                <Button variant="secondary" disabled={loading}>
-                    Need help?
-                </Button>
-                <Button
-                    onClick={handleNextClick}
-                    disabled={loading}
-                >
-                    Next
-                    <svg className="ml-2 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </Button>
-            </div>
+            {/* Sticky footer button group - only show when keyboard buttons are not visible */}
+            {!showKeyboardButtons && (
+                <div className="w-full bg-white flex space-x-8 items-center justify-center py-4">
+                    <Button
+                        onClick={handleBackClick}
+                        disabled={loading}
+                    >
+                        Back
+                    </Button>
+                    <Button variant="secondary" disabled={loading}>
+                        Need help?
+                    </Button>
+                    <Button
+                        onClick={handleNextClick}
+                        disabled={loading}
+                    >
+                        Next
+                        <svg className="ml-2 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </Button>
+                </div>
+            )}
         </div>
     );
 } 

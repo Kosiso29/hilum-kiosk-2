@@ -15,12 +15,28 @@ export default function CheckinPage() {
     const [referenceCode, setReferenceCode] = useState('');
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [showKeyboardButtons, setShowKeyboardButtons] = useState(false);
     const router = useRouter();
     const dispatch = useDispatch();
 
     const handleReferenceCodeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setReferenceCode(event.target.value);
         setErrorMessage(null); // Clear error message when input changes
+    };
+
+    const handleInputFocus = () => {
+        setShowKeyboardButtons(true);
+    };
+
+    const handleInputBlur = (event: React.FocusEvent) => {
+        // Add a small delay to allow button clicks to register before hiding the buttons
+        setTimeout(() => {
+            // Check if the new focused element is a button or inside a button
+            const target = event.relatedTarget as HTMLElement;
+            if (!target || (!target.closest('button') && target.tagName !== 'BUTTON')) {
+                setShowKeyboardButtons(false);
+            }
+        }, 150);
     };
 
     const handleNextClick = async () => {
@@ -104,13 +120,15 @@ export default function CheckinPage() {
                             <Input
                                 type="number"
                                 id="reference-code"
-                                placeholder="123456789"
+                                placeholder="############"
                                 className="mb-6"
                                 value={referenceCode}
                                 onChange={handleReferenceCodeChange}
                                 disabled={loading}
                                 pattern="[0-9]*"
                                 inputMode="numeric"
+                                onFocus={handleInputFocus}
+                                onBlur={handleInputBlur}
                             />
                         </div>
                         {errorMessage && <p className="text-red-500 text-xl mt-2">{errorMessage}</p>}
@@ -128,6 +146,25 @@ export default function CheckinPage() {
                             I don&apos;t have a code
                         </Button>
                     </div>
+
+                    {
+                        showKeyboardButtons && (
+                            <div className="w-full bg-white flex space-x-8 items-center justify-center py-4">
+                                <Button variant="secondary">
+                                    Need help?
+                                </Button>
+                                <Button
+                                    onClick={handleNextClick}
+                                    disabled={loading}
+                                >
+                                    Next
+                                    <svg className="ml-2 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </Button>
+                            </div>
+                        )
+                    }
                 </div>
 
                 <div className="relative h-20 w-full mb-2">
@@ -143,21 +180,23 @@ export default function CheckinPage() {
                 </div>
             </main>
 
-            {/* Sticky footer button group */}
-            <div className="w-full bg-white flex space-x-8 items-center justify-center py-4">
-                <Button variant="secondary">
-                    Need help?
-                </Button>
-                <Button
-                    onClick={handleNextClick}
-                    disabled={loading}
-                >
-                    Next
-                    <svg className="ml-2 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </Button>
-            </div>
+            {/* Sticky footer button group - only show when keyboard buttons are not visible */}
+            {!showKeyboardButtons && (
+                <div className="w-full bg-white flex space-x-8 items-center justify-center py-4">
+                    <Button variant="secondary">
+                        Need help?
+                    </Button>
+                    <Button
+                        onClick={handleNextClick}
+                        disabled={loading}
+                    >
+                        Next
+                        <svg className="ml-2 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </Button>
+                </div>
+            )}
         </div>
     );
 }
