@@ -6,6 +6,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { clearSession } from '@/app/store/authSlice';
 import { AppDispatch } from '@/app/store';
+import { useClinicData } from '@/app/hooks/useClinicData';
 import { idleTimerManager } from '@/app/lib/idleTimerManager';
 
 export default function Header() {
@@ -14,6 +15,7 @@ export default function Header() {
     const router = useRouter();
     const pathname = usePathname();
     const dispatch = useDispatch<AppDispatch>();
+    const { clearClinicData } = useClinicData();
 
     useEffect(() => {
         const updateDateTime = () => {
@@ -32,6 +34,13 @@ export default function Header() {
     const handleLogout = async () => {
         // Clear session from Redux store
         dispatch(clearSession());
+
+        // Clear clinic data from IndexedDB
+        try {
+            await clearClinicData();
+        } catch (error) {
+            console.error('Failed to clear clinic data:', error);
+        }
 
         // Clear session token cookie using fetch to ensure proper clearing
         try {

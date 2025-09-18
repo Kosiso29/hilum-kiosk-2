@@ -9,7 +9,7 @@ import Button from '../components/Button';
 import Input from '../components/Input';
 import { useDispatch } from 'react-redux';
 import { setBookings } from '../store/bookingSlice';
-import { NEXUS_NUMBER } from '../lib/config';
+import { getNexusNumberFromStorage } from '../lib/config';
 
 export default function CheckinPage() {
     const [referenceCode, setReferenceCode] = useState('');
@@ -31,9 +31,10 @@ export default function CheckinPage() {
 
         setLoading(true);
         try {
+            const nexusNumber = await getNexusNumberFromStorage();
             const params = new URLSearchParams({
                 bookingReference: referenceCode,
-                nexusNumber: NEXUS_NUMBER
+                nexusNumber
             });
 
             const response = await api.get(`slots/booking?${params}`);
@@ -101,13 +102,15 @@ export default function CheckinPage() {
                         <div className="flex flex-col items-start w-[65%] min-w-[20rem]">
                             <label htmlFor="reference-code" className="text-3xl font-semibold mb-6">Reference Code</label>
                             <Input
-                                type="text"
+                                type="number"
                                 id="reference-code"
-                                placeholder="############"
+                                placeholder="123456789"
                                 className="mb-6"
                                 value={referenceCode}
                                 onChange={handleReferenceCodeChange}
                                 disabled={loading}
+                                pattern="[0-9]*"
+                                inputMode="numeric"
                             />
                         </div>
                         {errorMessage && <p className="text-red-500 text-xl mt-2">{errorMessage}</p>}

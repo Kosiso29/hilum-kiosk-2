@@ -9,7 +9,7 @@ import api from '../lib/axios';
 import Button from '../components/Button';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
-import { NEXUS_NUMBER } from '../lib/config';
+import { getNexusNumberFromStorage } from '../lib/config';
 import { idleTimerManager } from '../lib/idleTimerManager';
 import axios from 'axios';
 
@@ -73,9 +73,10 @@ export default function AppointmentsPage() {
 
             // Check current requisition status from API
             try {
+                const nexusNumber = await getNexusNumberFromStorage();
                 const params = new URLSearchParams({
                     bookingReference: booking.bookingReference,
-                    nexusNumber: NEXUS_NUMBER
+                    nexusNumber
                 });
                 const response = await api.get(`slots/booking?${params}`);
 

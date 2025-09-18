@@ -43,7 +43,7 @@ export default function LoginPage() {
             const result = await dispatch(login({ email, password }));
 
             if (login.fulfilled.match(result)) {
-                router.push('/');
+                router.push('/clinic-selection');
             }
         } catch (error) {
             console.error('Login error:', error);

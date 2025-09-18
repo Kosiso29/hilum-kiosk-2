@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import { setBookings } from '../store/bookingSlice';
 import api from '../lib/axios';
 import { Booking } from '@/types/Booking';
-import { NEXUS_NUMBER } from '../lib/config';
+import { getNexusNumberFromStorage } from '../lib/config';
 
 export default function PersonalDetailsPage() {
     const [firstName, setFirstName] = useState('');
@@ -35,12 +35,13 @@ export default function PersonalDetailsPage() {
         setError(null);
         setLoading(true);
         try {
+            const nexusNumber = await getNexusNumberFromStorage();
             const params = new URLSearchParams({
                 firstName,
                 lastName,
                 patientDOB: dateOfBirth ? format(dateOfBirth, 'yyyy-MM-dd') : '',
                 ...(healthcareNumber && { patientHCN: healthcareNumber }),
-                nexusNumber: NEXUS_NUMBER,
+                nexusNumber,
             });
             const response = await api.get(`slots/booking?${params}`);
 
@@ -126,11 +127,13 @@ export default function PersonalDetailsPage() {
                         <div>
                             <label htmlFor="healthcare-number" className="text-xl font-semibold mb-4 block">Healthcare Number <span className="text-gray-500">(optional)</span></label>
                             <Input
-                                type="text"
+                                type="number"
                                 id="healthcare-number"
                                 placeholder="Enter healthcare number ..."
                                 value={healthcareNumber}
                                 onChange={(e) => setHealthcareNumber(e.target.value)}
+                                pattern="[0-9]*"
+                                inputMode="numeric"
                             />
                         </div>
                     </div>

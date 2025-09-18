@@ -1,14 +1,38 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import Header from '@/app/components/Header';
 import Button from './components/Button';
+import { useClinicData } from './hooks/useClinicData';
 
 export default function Home() {
   const router = useRouter();
+  const { isDataAvailable, loading } = useClinicData();
+  const [hasCheckedStorage, setHasCheckedStorage] = useState(false);
 
-  const handleTapToBegin = () => {
-    router.push('/entry');
+  useEffect(() => {
+    const checkStorage = async () => {
+      if (!loading) {
+        setHasCheckedStorage(true);
+      }
+    };
+    checkStorage();
+  }, [loading]);
+
+  const handleTapToBegin = async () => {
+    if (!hasCheckedStorage) {
+      return; // Wait for storage check to complete
+    }
+
+    const hasClinicData = await isDataAvailable();
+
+    // Check if a clinic is selected, if not redirect to clinic selection
+    if (!hasClinicData) {
+      router.push('/clinic-selection');
+    } else {
+      router.push('/entry');
+    }
   };
 
   return (

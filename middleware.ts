@@ -3,6 +3,9 @@ import { NextRequest, NextResponse } from 'next/server';
 // Define public routes that don't require authentication
 const publicRoutes = ['/login'];
 
+// Define routes that require authentication but not clinic selection
+const authenticatedRoutes = ['/clinic-selection'];
+
 // Define API routes that don't require authentication
 const publicApiRoutes = ['/api/auth/login', '/api/auth/logout'];
 
@@ -11,6 +14,16 @@ export function middleware(request: NextRequest) {
 
     // Check if it's a public route
     if (publicRoutes.includes(pathname)) {
+        return NextResponse.next();
+    }
+
+    // Check if it's an authenticated route (requires login but not clinic selection)
+    if (authenticatedRoutes.includes(pathname)) {
+        const sessionToken = request.cookies.get('session-token')?.value;
+        if (!sessionToken) {
+            const loginUrl = new URL('/login', request.url);
+            return NextResponse.redirect(loginUrl);
+        }
         return NextResponse.next();
     }
 
