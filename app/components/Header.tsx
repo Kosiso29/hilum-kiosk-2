@@ -2,20 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { useRouter, usePathname } from 'next/navigation';
-import { useDispatch } from 'react-redux';
-import { clearSession } from '@/app/store/authSlice';
-import { AppDispatch } from '@/app/store';
-import { useClinicData } from '@/app/hooks/useClinicData';
-import { idleTimerManager } from '@/app/lib/idleTimerManager';
+import { useRouter } from 'next/navigation';
+// Removed imports for logout functionality - now handled by /logout page
 
 export default function Header() {
     const [currentTime, setCurrentTime] = useState('');
     const [currentDate, setCurrentDate] = useState('');
     const router = useRouter();
-    const pathname = usePathname();
-    const dispatch = useDispatch<AppDispatch>();
-    const { clearClinicData } = useClinicData();
 
     useEffect(() => {
         const updateDateTime = () => {
@@ -29,39 +22,6 @@ export default function Header() {
 
         return () => clearInterval(timerId); // Clean up on unmount
     }, []);
-
-
-    const handleLogout = async () => {
-        // Clear session from Redux store
-        dispatch(clearSession());
-
-        // Clear clinic data from IndexedDB
-        try {
-            await clearClinicData();
-        } catch (error) {
-            console.error('Failed to clear clinic data:', error);
-        }
-
-        // Clear session token cookie using fetch to ensure proper clearing
-        try {
-            // Pause idle timer during logout API call
-            idleTimerManager.startApiCall();
-            await fetch('/api/auth/logout', {
-                method: 'POST',
-                credentials: 'include',
-            });
-            idleTimerManager.endApiCall();
-        } catch (error) {
-            console.error('Logout API error:', error);
-            // Ensure timer is resumed even if API call fails
-            idleTimerManager.endApiCall();
-            // Fallback: try to clear cookie manually
-            document.cookie = 'session-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; httpOnly=false; secure=false; sameSite=strict';
-        }
-
-        // Redirect to login
-        router.push('/login');
-    };
 
     return (
         <header className="w-full flex justify-between items-center mb-16">
@@ -90,20 +50,7 @@ export default function Header() {
                     </span>
                 </div>
 
-                {/* Divider - only show on non-login pages */}
-                {pathname !== '/login' && (
-                    <div className="h-16 w-px bg-gray-300"></div>
-                )}
-
-                {/* Logout Button - show on all pages except login */}
-                {pathname !== '/login' && (
-                    <button
-                        onClick={handleLogout}
-                        title="Logout"
-                    >
-                        Logout
-                    </button>
-                )}
+                {/* Logout functionality removed - use /logout path for admin logout */}
             </div>
         </header>
     );
