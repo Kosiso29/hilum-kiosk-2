@@ -43,13 +43,6 @@ export default function AppointmentsPage() {
 
     const handleSelect = (id: number, disabled: boolean, canCheckIn?: boolean) => {
         if (disabled) return;
-        if (canCheckIn === false) {
-            setCheckInError((prev) => ({
-                ...prev,
-                [id]: 'You can only check in within 30 minutes before and up to 10 minutes after your appointment.'
-            }));
-            return;
-        }
         setCheckInError((prev) => ({ ...prev, [id]: '' }));
         setSelected((prev) => {
             if (prev.includes(id)) {
@@ -178,16 +171,6 @@ export default function AppointmentsPage() {
                 {bookings.length > 0 && (
                     <div className="flex flex-col items-center w-full">
                         {bookings.map((booking) => {
-                            const now = new Date();
-                            const start = new Date(booking.startTimeStamp);
-                            const end = new Date(booking.endTimeStamp);
-                            const diffToStart = (start.getTime() - now.getTime()) / 60000; // minutes until start
-                            const diffFromStart = (now.getTime() - start.getTime()) / 60000; // minutes after start
-                            const canCheckIn =
-                                diffToStart <= 30 && // within 30 min before
-                                diffFromStart <= 10 && // not more than 10 min late
-                                diffToStart <= 30 && diffToStart >= -10; // between -10 and 30 min
-                            const past = end < now;
                             const isSelected = selected.includes(booking.id);
 
                             // Extract the time portion (HH:mm) from the ISO string directly
@@ -204,11 +187,11 @@ export default function AppointmentsPage() {
                                     key={booking.id}
                                     service={booking.service.service}
                                     time={`${startTime} - ${endTime}`}
-                                    disabled={past || loadingCheckInId !== null || !canCheckIn}
+                                    disabled={loadingCheckInId !== null}
                                     loading={loadingCheckInId === booking.id}
                                     error={checkInError[booking.id]}
                                     selected={isSelected}
-                                    onCheckIn={canCheckIn && !past && !loadingCheckInId ? () => handleSelect(booking.id, false, true) : undefined}
+                                    onCheckIn={!loadingCheckInId ? () => handleSelect(booking.id, false) : undefined}
                                 />
                             );
                         })}
