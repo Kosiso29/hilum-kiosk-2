@@ -7,6 +7,7 @@ import Button from '../components/Button';
 import { useClinicData } from '../hooks/useClinicData';
 import { Clinic } from '@/types/Clinic';
 import { idleTimerManager } from '../lib/idleTimerManager';
+import api from '../lib/axios';
 
 export default function ClinicSelectionPage() {
     const [selectedClinicId, setSelectedClinicId] = useState<string>('');
@@ -19,29 +20,26 @@ export default function ClinicSelectionPage() {
     const fetchClinics = useCallback(async () => {
         try {
             setLoading(true);
-            const response = await fetch('/api/clinics', {
-                method: 'GET',
-                credentials: 'include', // Include cookies for session
-            });
+            const response = await api.get('/clinics');
 
-            if (!response.ok) {
-                if (response.status === 401) {
-                    setError('Session expired. Please login again.');
-                    router.push('/login');
-                    return;
-                }
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-
-            if (data && data.clinics) {
-                setClinics(data.clinics);
+            if (response.data && response.data.clinics) {
+                setClinics(response.data.clinics);
             } else {
                 setError('No clinics found');
             }
         } catch (error: unknown) {
             console.error('Error fetching clinics:', error);
+
+            // Handle 401 errors specifically
+            if (error && typeof error === 'object' && 'response' in error) {
+                const axiosError = error as { response?: { status: number } };
+                if (axiosError.response?.status === 401) {
+                    setError('Session expired. Please login again.');
+                    router.push('/login');
+                    return;
+                }
+            }
+
             setError('Failed to load clinics. Please try again.');
         } finally {
             setLoading(false);

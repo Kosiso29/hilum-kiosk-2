@@ -6,6 +6,7 @@ import { useDispatch } from 'react-redux';
 import { clearSession } from '../store/authSlice';
 import { useClinicData } from '../hooks/useClinicData';
 import { idleTimerManager } from '../lib/idleTimerManager';
+import api from '../lib/axios';
 
 export default function LogoutPage() {
     const router = useRouter();
@@ -25,14 +26,11 @@ export default function LogoutPage() {
                     console.error('Failed to clear clinic data:', error);
                 }
 
-                // Clear session token cookie using fetch to ensure proper clearing
+                // Clear session token cookie using axios
                 try {
                     // Pause idle timer during logout API call
                     idleTimerManager.startApiCall();
-                    await fetch('/api/auth/logout', {
-                        method: 'POST',
-                        credentials: 'include',
-                    });
+                    await api.post('/auth/logout');
                     idleTimerManager.endApiCall();
                 } catch (error) {
                     console.error('Logout API error:', error);

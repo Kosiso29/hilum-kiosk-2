@@ -1,9 +1,9 @@
 import axios from 'axios';
-import { API_BASE_URL } from './config';
 import { idleTimerManager } from './idleTimerManager';
 
 const api = axios.create({
-    baseURL: API_BASE_URL,
+    baseURL: '/api', // Use internal API routes instead of external API
+    withCredentials: true, // This ensures httpOnly cookies are sent with requests
     // You can add headers or interceptors here if needed
 });
 
@@ -19,7 +19,7 @@ api.interceptors.request.use(
     }
 );
 
-// Response interceptor - resume idle timer when API call completes
+// Response interceptor - resume idle timer when API call completes and handle auth errors
 api.interceptors.response.use(
     (response) => {
         idleTimerManager.endApiCall();
@@ -27,6 +27,16 @@ api.interceptors.response.use(
     },
     (error) => {
         idleTimerManager.endApiCall();
+
+        // Handle authentication errors
+        if (error.response?.status === 401) {
+            // For httpOnly cookies, we can't clear them directly from client-side
+            // Redirect to logout page which will handle cookie clearing server-side
+            if (typeof window !== 'undefined') {
+                window.location.href = '/logout';
+            }
+        }
+
         return Promise.reject(error);
     }
 );

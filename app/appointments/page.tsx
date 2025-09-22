@@ -102,11 +102,20 @@ export default function AppointmentsPage() {
                 setCheckInError((prev) => ({ ...prev, [booking.id]: '' }));
             } catch (error) {
                 let message = 'There was an error with the check-in';
-                if (axios.isAxiosError(error) && error.response?.data?.message) {
-                    message = error.response.data.message;
+                if (axios.isAxiosError(error) && error.response?.data) {
+                    const errorData = error.response.data;
+                    // Check for nested error structure from our API route
+                    if (errorData.error && errorData.error.message) {
+                        message = errorData.error.message;
+                    } else if (errorData.message) {
+                        message = errorData.message;
+                    } else if (typeof errorData === 'string') {
+                        message = errorData;
+                    }
                 } else if (error instanceof Error) {
                     message = error.message;
                 }
+                console.log('Check-in error details:', error);
                 setCheckInError((prev) => ({ ...prev, [booking.id]: message }));
                 allSucceeded = false;
             } finally {
