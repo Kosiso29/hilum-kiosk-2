@@ -36,7 +36,7 @@ interface StoredClinicData {
 
 class ClinicStorageService {
     private dbName = 'HilumKioskDB';
-  private version = 2;
+  private version = 3;
   private storeName = 'clinicData';
   private keyStoreName = 'encryptionKey';
   private db: IDBDatabase | null = null;
@@ -81,11 +81,16 @@ class ClinicStorageService {
             };
 
             request.onupgradeneeded = (event) => {
-                const db = (event.target as IDBOpenDBRequest).result;
-                if (!db.objectStoreNames.contains(this.storeName)) {
-                    db.createObjectStore(this.storeName, { keyPath: 'id' });
-                }
-            };
+              const db = (event.target as IDBOpenDBRequest).result;
+
+              if (!db.objectStoreNames.contains(this.storeName)) {
+                  db.createObjectStore(this.storeName, { keyPath: 'id' });
+              }
+
+              if (!db.objectStoreNames.contains(this.keyStoreName)) {
+                  db.createObjectStore(this.keyStoreName, { keyPath: 'id' });
+              }
+          };
         });
     }
 
