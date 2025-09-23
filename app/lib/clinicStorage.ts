@@ -36,21 +36,39 @@ interface StoredClinicData {
 
 class ClinicStorageService {
     private dbName = 'HilumKioskDB';
-    private version = 1;
-    private storeName = 'clinicData';
-    private db: IDBDatabase | null = null;
+  private version = 2;
+  private storeName = 'clinicData';
+  private keyStoreName = 'encryptionKey';
+  private db: IDBDatabase | null = null;
+  private cachedKey: string | null = null;
 
-    // Generate a passphrase based on device characteristics
-    private getPassphrase(): string {
-        // Use a combination of device characteristics to create a unique passphrase
-        // This is not cryptographically secure but provides basic obfuscation
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        ctx?.fillText('HilumKiosk', 10, 10);
-        const fingerprint = canvas.toDataURL();
+    private async getOrCreatePassphrase(): Promise<string> {
+    if (this.cachedKey) return this.cachedKey;
 
-        return `${navigator.userAgent}-${navigator.language}-${fingerprint.slice(-20)}`;
+    if (!this.db) {
+      await this.init();
     }
+
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.keyStoreName], 'readwrite');
+      const store = transaction.objectStore(this.keyStoreName);
+      const getReq = store.get('key');
+
+      getReq.onsuccess = () => {
+      let key: string;
+      if (getReq.result?.value) {
+        key = getReq.result.value;
+      } else {
+        key = crypto.randomUUID();
+        store.put({ id: 'key', value: key });
+      }
+      this.cachedKey = key;
+      resolve(key); 
+    };
+
+      getReq.onerror = () => reject(getReq.error);
+    });
+  }
 
     async init(): Promise<void> {
         return new Promise((resolve, reject) => {
@@ -76,7 +94,7 @@ class ClinicStorageService {
             await this.init();
         }
 
-        const passphrase = this.getPassphrase();
+        const passphrase = await this.getOrCreatePassphrase();
         const dataToStore = JSON.stringify(clinicData);
         const encryptedData = await encryptForStorage(dataToStore, passphrase);
 
@@ -100,34 +118,32 @@ class ClinicStorageService {
             await this.init();
         }
 
-        return new Promise((resolve, reject) => {
-            const transaction = this.db!.transaction([this.storeName], 'readonly');
-            const store = transaction.objectStore(this.storeName);
-            const request = store.get('selectedClinic');
+    const passphrase = await this.getOrCreatePassphrase();
 
-            request.onerror = () => reject(request.error);
-            request.onsuccess = async () => {
-                const result = request.result as (StoredClinicData & { id: string }) | undefined;
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.storeName], 'readonly');
+      const store = transaction.objectStore(this.storeName);
+      const request = store.get('selectedClinic');
 
-                if (!result) {
-                    resolve(null);
-                    return;
-                }
+      request.onerror = () => reject(request.error);
+      request.onsuccess = async () => {
+        const result = request.result as (StoredClinicData & { id: string }) | undefined;
+        if (!result) {
+          resolve(null);
+          return;
+        }
 
-                try {
-                    const passphrase = this.getPassphrase();
-                    const decryptedData = await decryptFromStorage(result.encryptedData, passphrase);
-                    const clinicData = JSON.parse(decryptedData) as EncryptedClinicData;
-                    resolve(clinicData);
-                } catch (error) {
-                    console.error('Failed to decrypt clinic data:', error);
-                    // If decryption fails, clear the corrupted data
-                    await this.clearClinicData();
-                    resolve(null);
-                }
-            };
-        });
-    }
+        try {
+          const decryptedData = await decryptFromStorage(result.encryptedData, passphrase);
+          resolve(JSON.parse(decryptedData));
+        } catch (error) {
+          console.error('Failed to decrypt clinic data:', error);
+          await this.clearClinicData();
+          resolve(null);
+        }
+      };
+    });
+  }
 
     async clearClinicData(): Promise<void> {
         if (!this.db) {
