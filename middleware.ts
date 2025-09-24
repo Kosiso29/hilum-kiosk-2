@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // Define public routes that don't require authentication
-const publicRoutes = ['/login'];
+const publicRoutes = ['/login', '/manifest.json', '/sw.js'];
 
 // Define routes that require authentication but not clinic selection
 const authenticatedRoutes = ['/clinic-selection'];
