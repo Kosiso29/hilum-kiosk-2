@@ -131,7 +131,7 @@ export default function CheckinPage() {
                                 onBlur={handleInputBlur}
                             />
                         </div>
-                        {errorMessage && <p className="text-red-500 text-xl mt-2">{errorMessage}</p>}
+                        {errorMessage && <p className="text-red-500 text-left text-xl mt-2">{errorMessage}</p>}
                         <p className="text-xl text-gray-600 text-left mt-4">
                             Find the reference code in your appointment
                             <span className="font-semibold"> email</span> or <span className="font-semibold">text</span>
