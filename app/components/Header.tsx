@@ -38,13 +38,19 @@ export default function Header() {
             }
         };
 
-        // Only check on pages that require clinic data (not login, logout, or clinic selection pages)
-        if (typeof window !== 'undefined' &&
-            !window.location.pathname.includes('/login') &&
-            !window.location.pathname.includes('/logout') &&
-            !window.location.pathname.includes('/clinic-selection')) {
-            checkClinicData();
-        }
+        // Add a delay to allow PWA evaluation to complete before checking clinic data
+        // This prevents immediate redirects during PWA installation process
+        const timeoutId = setTimeout(() => {
+            // Only check on pages that require clinic data (not login, logout, or clinic selection pages)
+            if (typeof window !== 'undefined' &&
+                !window.location.pathname.includes('/login') &&
+                !window.location.pathname.includes('/logout') &&
+                !window.location.pathname.includes('/clinic-selection')) {
+                checkClinicData();
+            }
+        }, 2000); // 2 second delay to allow PWA evaluation
+
+        return () => clearTimeout(timeoutId);
     }, []);
 
     return (
