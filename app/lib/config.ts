@@ -5,7 +5,7 @@ export const config = {
     NEXUS_NUMBER: process.env.NEXT_PUBLIC_NEXUS_NUMBER || '6473603374',
 
     // API Configuration
-    API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || 'https://staging.telelink.wosler.ca/api/',
+    API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || 'https://staging.nexus.wosler.ca/api/',
 
     // App Configuration
     APP_NAME: 'Hilum Kiosk',

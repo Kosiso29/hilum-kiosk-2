@@ -7,10 +7,11 @@ interface AppointmentCardProps {
     loading?: boolean;
     error?: string;
     selected?: boolean;
+    checkedIn?: boolean;
     onCheckIn?: () => void;
 }
 
-const AppointmentCard: React.FC<AppointmentCardProps> = ({ service, time, disabled, loading, error, selected, onCheckIn }) => {
+const AppointmentCard: React.FC<AppointmentCardProps> = ({ service, time, disabled, loading, error, selected, checkedIn, onCheckIn }) => {
     // Determine why the button is disabled
     // If loadingCheckInId disables, parent will pass disabled=true but loading=false
     // We'll use a prop to indicate this, but since we don't have it, infer from props
@@ -30,18 +31,11 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({ service, time, disabl
                 </svg>
             </span>
         );
+    } else if (checkedIn) {
+        buttonText = 'Checked In';
     } else if (selected) {
         buttonText = 'Selected';
-    }
-    // If disabled and not loading, check if it's due to loadingCheckInId (parent disables all during loading)
-    // We'll assume: if disabled && !loading && selected, keep 'Selected'
-    // If disabled && !loading && !selected, show 'Disabled'
-    // But if disabled && !loading && selected, keep 'Selected'
-    // If disabled && !loading && !selected, show 'Disabled'
-    // If not disabled, show 'Check-In' or 'Selected'
-
-    // If disabled and not loading and not selected, show 'Disabled'
-    if (disabled && !loading && !selected) {
+    } else if (disabled && !loading && !selected) {
         buttonText = 'Disabled';
     }
 
@@ -54,14 +48,16 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({ service, time, disabl
                     <div className="text-lg text-gray-500 font-medium">{time}</div>
                 </div>
                 <button
-                    className={`ml-4 px-10 py-3 rounded-full border-2 text-xl font-semibold transition-all w-[12rem]
-                        ${disabled || loading
-                            ? 'border-gray-300 text-gray-400 bg-white cursor-not-allowed'
-                            : selected
-                                ? 'bg-gradient-to-r from-purple-600 to-pink-500 text-white border-none'
-                                : 'border-purple-400 text-purple-500 bg-white hover:bg-purple-50'}
+                    className={`ml-4 px-10 py-3 rounded-full border-2 text-xl font-semibold transition-all w-[13rem]
+                        ${checkedIn
+                            ? 'border-green-300 text-green-300 bg-green-50 cursor-not-allowed'
+                            : disabled || loading
+                                ? 'border-gray-300 text-gray-400 bg-white cursor-not-allowed'
+                                : selected
+                                    ? 'bg-gradient-to-r from-purple-600 to-pink-500 text-white border-none'
+                                    : 'border-purple-400 text-purple-500 bg-white hover:bg-purple-50'}
                     `}
-                    disabled={disabled || loading}
+                    disabled={disabled || loading || checkedIn}
                     onClick={onCheckIn}
                 >
                     {buttonText}

@@ -30,4 +30,5 @@ export interface Booking {
     bookingReference: string;
     requisitionUploadStatus: boolean;
     referringDoctorStatus: boolean;
+    checkedIn: boolean;
 } 

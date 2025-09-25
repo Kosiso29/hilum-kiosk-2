@@ -41,8 +41,8 @@ export default function AppointmentsPage() {
         };
     }, [showQRCode]);
 
-    const handleSelect = (id: number, disabled: boolean) => {
-        if (disabled) return;
+    const handleSelect = (id: number, disabled: boolean, checkedIn: boolean) => {
+        if (disabled || checkedIn) return;
         setCheckInError((prev) => ({ ...prev, [id]: '' }));
         setSelected((prev) => {
             if (prev.includes(id)) {
@@ -64,6 +64,8 @@ export default function AppointmentsPage() {
             const booking = bookings.find((b) => b.id === id);
             if (!booking) continue;
 
+            setLoadingCheckInId(booking.id);
+
             // Check current requisition status from API
             try {
                 const nexusNumber = await getNexusNumberFromStorage();
@@ -78,6 +80,7 @@ export default function AppointmentsPage() {
                     if (!currentBooking.requisitionUploadStatus || !currentBooking.referringDoctorStatus) {
                         setQrBookingRef(booking.bookingReference);
                         setShowQRCode(true);
+                        setLoadingCheckInId(null);
                         return;
                     }
                 }
@@ -89,11 +92,11 @@ export default function AppointmentsPage() {
                         ...prev,
                         [booking.id]: 'Requisition upload status check failed'
                     }));
+                    setLoadingCheckInId(null);
                     return;
                 }
             }
 
-            setLoadingCheckInId(booking.id);
             try {
                 // Call the new check-in API endpoint
                 await api.get(`check-in/${booking.bookingReference}`);
@@ -200,7 +203,8 @@ export default function AppointmentsPage() {
                                     loading={loadingCheckInId === booking.id}
                                     error={checkInError[booking.id]}
                                     selected={isSelected}
-                                    onCheckIn={!loadingCheckInId ? () => handleSelect(booking.id, false) : undefined}
+                                    checkedIn={booking.checkedIn}
+                                    onCheckIn={!loadingCheckInId ? () => handleSelect(booking.id, false, booking.checkedIn) : undefined}
                                 />
                             );
                         })}
