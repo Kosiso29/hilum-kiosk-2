@@ -34,23 +34,23 @@ export async function GET(request: NextRequest) {
             session: refreshedSessionData,
         });
 
-        // Update the session token cookie if a new token is provided
+        // Update the session token cookie if a new token is provided - PERMANENT STORAGE
         if (refreshedSessionData.token) {
             nextResponse.cookies.set('session-token', refreshedSessionData.token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
-                maxAge: 60 * 60 * 24 * 7, // 7 days
+                maxAge: 60 * 60 * 24 * 365 * 10, // 10 years - effectively permanent
             });
         }
 
-        // Update the refresh token cookie if a new refresh token is provided
+        // Update the refresh token cookie if a new refresh token is provided - PERMANENT STORAGE
         if (refreshedSessionData.refreshToken) {
             nextResponse.cookies.set('refreshToken', refreshedSessionData.refreshToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
-                maxAge: 60 * 60 * 24 * 30, // 30 days
+                maxAge: 60 * 60 * 24 * 365 * 10, // 10 years - effectively permanent
             });
         }
 

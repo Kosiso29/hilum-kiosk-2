@@ -28,23 +28,23 @@ export async function POST(request: NextRequest) {
             session: sessionData,
         });
 
-        // Set session token as httpOnly cookie for security
+        // Set session token as httpOnly cookie for security - PERMANENT STORAGE
         if (sessionData.token) {
             nextResponse.cookies.set('session-token', sessionData.token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
-                maxAge: 60 * 60 * 24 * 7, // 7 days
+                maxAge: 60 * 60 * 24 * 365 * 10, // 10 years - effectively permanent
             });
         }
 
-        // Set refresh token as httpOnly cookie for token refresh
+        // Set refresh token as httpOnly cookie for token refresh - PERMANENT STORAGE
         if (sessionData.refreshToken) {
             nextResponse.cookies.set('refreshToken', sessionData.refreshToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
-                maxAge: 60 * 60 * 24 * 30, // 30 days
+                maxAge: 60 * 60 * 24 * 365 * 10, // 10 years - effectively permanent
             });
         }
 
