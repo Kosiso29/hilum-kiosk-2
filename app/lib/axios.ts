@@ -28,26 +28,26 @@ api.interceptors.response.use(
     async (error) => {
         idleTimerManager.endApiCall();
 
-        // Handle authentication errors
-        if (error.response?.status === 401) {
-            // Don't auto-logout for token refresh endpoint - let the refresh mechanism handle it
-            if (error.config?.url?.includes('/auth/refreshKioskToken')) {
-                return Promise.reject(error);
-            }
+        // // Handle authentication errors
+        // if (error.response?.status === 401) {
+        //     // Don't auto-logout for token refresh endpoint - let the refresh mechanism handle it
+        //     if (error.config?.url?.includes('/auth/refreshKioskToken')) {
+        //         return Promise.reject(error);
+        //     }
 
-            // For other 401 errors, try to refresh the token first
-            try {
-                await api.get('/auth/refreshKioskToken');
-                // If refresh succeeds, retry the original request
-                return api.request(error.config);
-            } catch (refreshError) {
-                // If refresh fails, then redirect to logout
-                console.error('Token refresh failed in interceptor:', refreshError);
-                if (typeof window !== 'undefined') {
-                    window.location.href = '/logout';
-                }
-            }
-        }
+        //     // For other 401 errors, try to refresh the token first
+        //     try {
+        //         await api.get('/auth/refreshKioskToken');
+        //         // If refresh succeeds, retry the original request
+        //         return api.request(error.config);
+        //     } catch (refreshError) {
+        //         // If refresh fails, then redirect to logout
+        //         console.error('Token refresh failed in interceptor:', refreshError);
+        //         if (typeof window !== 'undefined') {
+        //             window.location.href = '/logout';
+        //         }
+        //     }
+        // }
 
         return Promise.reject(error);
     }

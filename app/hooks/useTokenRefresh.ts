@@ -20,16 +20,16 @@ export const useTokenRefresh = () => {
             } catch (error) {
                 console.error('❌ Failed to refresh kiosk tokens:', error);
                 // If token refresh fails, redirect to logout to clear invalid session
-                if (error && typeof error === 'object' && 'response' in error) {
-                    const axiosError = error as { response?: { status: number } };
-                    if (axiosError.response?.status === 401) {
-                        console.log('🔄 Session expired, redirecting to logout');
-                        router.push('/logout');
-                    } else if (axiosError.response?.status === 404) {
-                        console.warn('⚠️ Token refresh endpoint not available - continuing without refresh');
-                        // Don't redirect on 404, just log a warning and continue
-                    }
-                }
+                // if (error && typeof error === 'object' && 'response' in error) {
+                //     const axiosError = error as { response?: { status: number } };
+                //     if (axiosError.response?.status === 401) {
+                //         console.log('🔄 Session expired, redirecting to logout');
+                //         router.push('/logout');
+                //     } else if (axiosError.response?.status === 404) {
+                //         console.warn('⚠️ Token refresh endpoint not available - continuing without refresh');
+                //         // Don't redirect on 404, just log a warning and continue
+                //     }
+                // }
             }
         };
 
