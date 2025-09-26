@@ -3,9 +3,12 @@
 import { useRouter } from 'next/navigation';
 import Header from '@/app/components/Header';
 import Button from '../components/Button';
+import HelpModal from '../components/HelpModal';
+import { useHelpModal } from '../hooks/useHelpModal';
 
 export default function CheckinPage() {
     const router = useRouter();
+    const { isHelpModalOpen, openHelpModal, closeHelpModal } = useHelpModal();
 
     const handleCheckinClick = () => {
         router.push('/checkin');
@@ -57,7 +60,7 @@ export default function CheckinPage() {
 
             {/* Sticky footer button group */}
             <div className="w-full bg-white flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-8 items-center justify-center py-4">
-                <Button variant="secondary" className="text-lg md:text-2xl">
+                <Button variant="secondary" className="text-lg md:text-2xl" onClick={openHelpModal}>
                     Need help?
                 </Button>
                 <Button className="text-lg md:text-2xl">
@@ -67,6 +70,12 @@ export default function CheckinPage() {
                     </svg>
                 </Button>
             </div>
+
+            {/* Help Modal */}
+            <HelpModal
+                isOpen={isHelpModalOpen}
+                onClose={closeHelpModal}
+            />
         </div>
     );
 } 

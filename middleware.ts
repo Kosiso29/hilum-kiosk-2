@@ -7,7 +7,7 @@ const publicRoutes = ['/login', '/manifest.json', '/sw.js'];
 const authenticatedRoutes = ['/clinic-selection'];
 
 // Define API routes that don't require authentication
-const publicApiRoutes = ['/api/auth/login', '/api/auth/logout'];
+const publicApiRoutes = ['/api/auth/login', '/api/auth/logout', '/api/auth/refreshKioskToken'];
 
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;

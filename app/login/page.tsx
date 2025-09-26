@@ -8,11 +8,13 @@ import { RootState, AppDispatch } from '@/app/store';
 import Header from '@/app/components/Header';
 import Button from '@/app/components/Button';
 import Input from '@/app/components/Input';
+import { useClinicPhone } from '@/app/hooks/useClinicPhone';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const { clinicPhone, hasClinicData } = useClinicPhone();
 
     const dispatch = useDispatch<AppDispatch>();
     const router = useRouter();
@@ -85,7 +87,9 @@ export default function LoginPage() {
                                         </h3>
                                         <div className="mt-2 text-sm text-amber-700">
                                             <p className="mb-2">
-                                                If you&apos;re a patient, please speak to our reception staff or contact our technical support team. <br /> Support: <span className="font-medium">+1 (647) 691-6053</span>
+                                                If you&apos;re a patient, please speak to our reception staff{hasClinicData && (
+                                                    <> or contact our technical support team. <br /> Support: <span className="font-medium">{clinicPhone}</span></>
+                                                )}
                                             </p>
                                         </div>
                                     </div>

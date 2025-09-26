@@ -25,15 +25,27 @@ api.interceptors.response.use(
         idleTimerManager.endApiCall();
         return response;
     },
-    (error) => {
+    async (error) => {
         idleTimerManager.endApiCall();
 
         // Handle authentication errors
         if (error.response?.status === 401) {
-            // For httpOnly cookies, we can't clear them directly from client-side
-            // Redirect to logout page which will handle cookie clearing server-side
-            if (typeof window !== 'undefined') {
-                window.location.href = '/logout';
+            // Don't auto-logout for token refresh endpoint - let the refresh mechanism handle it
+            if (error.config?.url?.includes('/auth/refreshKioskToken')) {
+                return Promise.reject(error);
+            }
+
+            // For other 401 errors, try to refresh the token first
+            try {
+                await api.get('/auth/refreshKioskToken');
+                // If refresh succeeds, retry the original request
+                return api.request(error.config);
+            } catch (refreshError) {
+                // If refresh fails, then redirect to logout
+                console.error('Token refresh failed in interceptor:', refreshError);
+                if (typeof window !== 'undefined') {
+                    window.location.href = '/logout';
+                }
             }
         }
 

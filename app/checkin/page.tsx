@@ -7,6 +7,8 @@ import Header from '@/app/components/Header';
 import api from '../lib/axios';
 import Button from '../components/Button';
 import Input from '../components/Input';
+import HelpModal from '../components/HelpModal';
+import { useHelpModal } from '../hooks/useHelpModal';
 import { useDispatch } from 'react-redux';
 import { setBookings } from '../store/bookingSlice';
 import { getNexusNumberFromStorage } from '../lib/config';
@@ -18,6 +20,7 @@ export default function CheckinPage() {
     const [showKeyboardButtons, setShowKeyboardButtons] = useState(false);
     const router = useRouter();
     const dispatch = useDispatch();
+    const { isHelpModalOpen, openHelpModal, closeHelpModal } = useHelpModal();
 
     const handleReferenceCodeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setReferenceCode(event.target.value);
@@ -170,7 +173,7 @@ export default function CheckinPage() {
                     {
                         showKeyboardButtons && (
                             <div className="w-full bg-white flex space-x-8 items-center justify-center py-4">
-                                <Button variant="secondary">
+                                <Button variant="secondary" onClick={openHelpModal}>
                                     Need help?
                                 </Button>
                                 <Button
@@ -191,7 +194,7 @@ export default function CheckinPage() {
             {/* Sticky footer button group - only show when keyboard buttons are not visible */}
             {!showKeyboardButtons && (
                 <div className="w-full bg-white flex space-x-8 items-center justify-center py-4">
-                    <Button variant="secondary">
+                    <Button variant="secondary" onClick={openHelpModal}>
                         Need help?
                     </Button>
                     <Button
@@ -205,6 +208,12 @@ export default function CheckinPage() {
                     </Button>
                 </div>
             )}
+
+            {/* Help Modal */}
+            <HelpModal
+                isOpen={isHelpModalOpen}
+                onClose={closeHelpModal}
+            />
         </div>
     );
 }

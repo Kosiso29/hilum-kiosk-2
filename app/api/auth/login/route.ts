@@ -38,6 +38,16 @@ export async function POST(request: NextRequest) {
             });
         }
 
+        // Set refresh token as httpOnly cookie for token refresh
+        if (sessionData.refreshToken) {
+            nextResponse.cookies.set('refreshToken', sessionData.refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                maxAge: 60 * 60 * 24 * 30, // 30 days
+            });
+        }
+
         return nextResponse;
     } catch (error: unknown) {
         console.error('Login error:', error);

@@ -5,10 +5,12 @@ import { useEffect, useState } from 'react';
 import Header from '@/app/components/Header';
 import Button from './components/Button';
 import { useClinicData } from './hooks/useClinicData';
+import { useClinicPhone } from './hooks/useClinicPhone';
 
 export default function Home() {
   const router = useRouter();
   const { isDataAvailable, loading } = useClinicData();
+  const { clinicPhone, hasClinicData } = useClinicPhone();
   const [hasCheckedStorage, setHasCheckedStorage] = useState(false);
 
   useEffect(() => {
@@ -80,7 +82,9 @@ export default function Home() {
               </Button>
             </div>
             <p className="text-sm text-gray-500 text-center max-w-md">
-              For walk-in or any other questions, please call the receptionist or contact us at <span className="font-medium">+1 (647) 691-6053</span>
+              For walk-in or any other questions, please call the receptionist{hasClinicData && (
+                <> or contact us at <span className="font-medium">{clinicPhone}</span></>
+              )}
             </p>
           </div>
         </div>

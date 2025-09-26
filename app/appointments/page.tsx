@@ -12,6 +12,8 @@ import { RootState } from '../store';
 import { getNexusNumberFromStorage } from '../lib/config';
 import { idleTimerManager } from '../lib/idleTimerManager';
 import axios from 'axios';
+import HelpModal from '../components/HelpModal';
+import { useHelpModal } from '../hooks/useHelpModal';
 
 export default function AppointmentsPage() {
     const router = useRouter();
@@ -22,6 +24,7 @@ export default function AppointmentsPage() {
     const [selected, setSelected] = useState<number[]>([]);
     const [showQRCode, setShowQRCode] = useState(false);
     const [qrBookingRef, setQrBookingRef] = useState<string>('');
+    const { isHelpModalOpen, openHelpModal, closeHelpModal } = useHelpModal();
 
     // Manage idle timer based on QR code dialog state
     useEffect(() => {
@@ -141,8 +144,7 @@ export default function AppointmentsPage() {
     };
 
     const handleNeedHelpClick = () => {
-        // Logic for help
-        console.log("Need help clicked");
+        openHelpModal();
     };
 
     const handleCloseQRCode = () => {
@@ -243,6 +245,12 @@ export default function AppointmentsPage() {
                     </svg>
                 </Button>
             </div>
+
+            {/* Help Modal */}
+            <HelpModal
+                isOpen={isHelpModalOpen}
+                onClose={closeHelpModal}
+            />
         </div>
     );
 }

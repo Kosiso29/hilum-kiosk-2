@@ -8,11 +8,14 @@ import { DatePicker } from '../components/DatePicker';
 import { format } from 'date-fns';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
+import HelpModal from '../components/HelpModal';
+import { useHelpModal } from '../hooks/useHelpModal';
 
 export default function VerifyIdentityPage() {
     const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const router = useRouter();
+    const { isHelpModalOpen, openHelpModal, closeHelpModal } = useHelpModal();
 
     // Get bookings from Redux
     const bookings = useSelector((state: RootState) => state.booking.bookings);
@@ -77,7 +80,7 @@ export default function VerifyIdentityPage() {
 
             {/* Sticky footer button group */}
             <div className="w-full bg-white flex space-x-8 items-center justify-center py-4 mt-auto">
-                <Button variant="secondary">
+                <Button variant="secondary" onClick={openHelpModal}>
                     Need help?
                 </Button>
                 <Button
@@ -89,6 +92,12 @@ export default function VerifyIdentityPage() {
                     </svg>
                 </Button>
             </div>
+
+            {/* Help Modal */}
+            <HelpModal
+                isOpen={isHelpModalOpen}
+                onClose={closeHelpModal}
+            />
         </div>
     );
 }

@@ -12,6 +12,8 @@ import { setBookings } from '../store/bookingSlice';
 import api from '../lib/axios';
 import { Booking } from '@/types/Booking';
 import { getNexusNumberFromStorage } from '../lib/config';
+import HelpModal from '../components/HelpModal';
+import { useHelpModal } from '../hooks/useHelpModal';
 
 export default function PersonalDetailsPage() {
     const [firstName, setFirstName] = useState('');
@@ -23,6 +25,7 @@ export default function PersonalDetailsPage() {
     const [showKeyboardButtons, setShowKeyboardButtons] = useState(false);
     const router = useRouter();
     const dispatch = useDispatch();
+    const { isHelpModalOpen, openHelpModal, closeHelpModal } = useHelpModal();
 
     const handleBackClick = () => {
         router.back();
@@ -187,7 +190,7 @@ export default function PersonalDetailsPage() {
                             >
                                 Back
                             </Button>
-                            <Button variant="secondary" disabled={loading}>
+                            <Button variant="secondary" onClick={openHelpModal} disabled={loading}>
                                 Need help?
                             </Button>
                             <Button
@@ -212,7 +215,7 @@ export default function PersonalDetailsPage() {
                     >
                         Back
                     </Button>
-                    <Button variant="secondary" disabled={loading}>
+                    <Button variant="secondary" onClick={openHelpModal} disabled={loading}>
                         Need help?
                     </Button>
                     <Button
@@ -226,6 +229,12 @@ export default function PersonalDetailsPage() {
                     </Button>
                 </div>
             )}
+
+            {/* Help Modal */}
+            <HelpModal
+                isOpen={isHelpModalOpen}
+                onClose={closeHelpModal}
+            />
         </div>
     );
 } 

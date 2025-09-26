@@ -4,11 +4,15 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { clinicStorage } from '@/app/lib/clinicStorage';
+import { useTokenRefresh } from '../hooks/useTokenRefresh';
 
 export default function Header() {
     const [currentTime, setCurrentTime] = useState('');
     const [currentDate, setCurrentDate] = useState('');
     const router = useRouter();
+
+    // Refresh MOA tokens on page load for all pages
+    useTokenRefresh();
 
     useEffect(() => {
         const updateDateTime = () => {
