@@ -94,11 +94,8 @@ export default function PersonalDetailsPage() {
             dispatch(setBookings(todaysBookings));
             router.push('/appointments');
         } catch (error: unknown) {
-            if (error instanceof Error) {
-                setError(error.message);
-            } else {
-                setError('Failed to find bookings. Please try again.');
-            }
+            console.error('Error fetching bookings:', error);
+            setError('We\'re experiencing some technical difficulties. Please call the receptionist for assistance with your check-in.');
         } finally {
             setLoading(false);
         }

@@ -19,6 +19,7 @@
 class IdleTimerManager {
     private timer: NodeJS.Timeout | null = null;
     private isPaused = false;
+    private wasManuallyPaused = false; // Track if was manually paused before API calls
     private activeApiCalls = 0;
     private timeoutDuration = 45000; // 45 seconds
     private onTimeout: () => void;
@@ -82,17 +83,19 @@ class IdleTimerManager {
     }
 
     /**
-     * Pause the timer (used during API calls)
+     * Pause the timer (used during API calls or manually)
      */
     pause() {
+        this.wasManuallyPaused = this.isPaused; // Remember if was already paused
         this.isPaused = true;
         this.clearTimer();
     }
 
     /**
-     * Resume the timer (used after API calls complete)
+     * Resume the timer (used after API calls complete or manually)
      */
     resume() {
+        this.wasManuallyPaused = false; // Clear the flag
         this.isPaused = false;
         this.start();
     }
@@ -113,7 +116,14 @@ class IdleTimerManager {
     endApiCall() {
         this.activeApiCalls = Math.max(0, this.activeApiCalls - 1);
         if (this.activeApiCalls === 0) {
-            this.resume();
+            // Only auto-resume if it wasn't manually paused before the API call
+            if (!this.wasManuallyPaused) {
+                this.resume();
+            } else {
+                // Restore the manually paused state
+                this.isPaused = true;
+                this.clearTimer();
+            }
         }
     }
 

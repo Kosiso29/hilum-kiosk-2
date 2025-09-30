@@ -7,16 +7,19 @@ import AppointmentCard from '../components/AppointmentCard';
 import RequisitionQRCode from '../components/RequisitionQRCode';
 import api from '../lib/axios';
 import Button from '../components/Button';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store';
+import { setBookings } from '../store/bookingSlice';
 import { getNexusNumberFromStorage } from '../lib/config';
 import { idleTimerManager } from '../lib/idleTimerManager';
 import axios from 'axios';
 import HelpModal from '../components/HelpModal';
 import { useHelpModal } from '../hooks/useHelpModal';
+import QRKeepAlivePopup from '../components/QRKeepAlivePopup';
 
 export default function AppointmentsPage() {
     const router = useRouter();
+    const dispatch = useDispatch();
     const bookings = useSelector((state: RootState) => state.booking.bookings);
     const [error, setError] = useState<string | null>(null);
     const [loadingCheckInId, setLoadingCheckInId] = useState<number | null>(null);
@@ -24,6 +27,7 @@ export default function AppointmentsPage() {
     const [selected, setSelected] = useState<number[]>([]);
     const [showQRCode, setShowQRCode] = useState(false);
     const [qrBookingRef, setQrBookingRef] = useState<string>('');
+    const [showKeepAlivePopup, setShowKeepAlivePopup] = useState(false);
     const { isHelpModalOpen, openHelpModal, closeHelpModal } = useHelpModal();
 
     // Manage idle timer based on QR code dialog state
@@ -43,6 +47,24 @@ export default function AppointmentsPage() {
             }
         };
     }, [showQRCode]);
+
+    // Manage 2-minute keep-alive popup for QR code
+    useEffect(() => {
+        let keepAliveInterval: NodeJS.Timeout | null = null;
+
+        if (showQRCode && !showKeepAlivePopup) {
+            // Start 2-minute interval for keep-alive popup
+            keepAliveInterval = setInterval(() => {
+                setShowKeepAlivePopup(true);
+            }, 2 * 60 * 1000); // 2 minutes
+        }
+
+        return () => {
+            if (keepAliveInterval) {
+                clearInterval(keepAliveInterval);
+            }
+        };
+    }, [showQRCode, showKeepAlivePopup]);
 
     const handleSelect = (id: number, disabled: boolean, checkedIn: boolean) => {
         if (disabled || checkedIn) return;
@@ -69,31 +91,46 @@ export default function AppointmentsPage() {
 
             setLoadingCheckInId(booking.id);
 
-            // Check current requisition status from API
-            try {
-                const nexusNumber = await getNexusNumberFromStorage();
-                const params = new URLSearchParams({
-                    bookingReference: booking.bookingReference,
-                    nexusNumber
-                });
-                const response = await api.get(`slots/booking?${params}`);
+            // Check if requisition and referring doctor status are already available
+            if (!booking.requisitionUploadStatus || !booking.referringDoctorStatus) {
+                // Missing requisition or referring doctor status - fetch from API
+                try {
+                    const nexusNumber = await getNexusNumberFromStorage();
+                    const params = new URLSearchParams({
+                        bookingReference: booking.bookingReference,
+                        nexusNumber
+                    });
+                    const response = await api.get(`slots/booking?${params}`);
 
-                if (response.data && response.data.length > 0) {
-                    const currentBooking = response.data[0];
-                    if (!currentBooking.requisitionUploadStatus || !currentBooking.referringDoctorStatus) {
-                        setQrBookingRef(booking.bookingReference);
-                        setShowQRCode(true);
-                        setLoadingCheckInId(null);
-                        return;
+                    if (response.data && response.data.length > 0) {
+                        const currentBooking = response.data[0];
+
+                        // Update the existing booking with the new data
+                        const updatedBooking = {
+                            ...booking,
+                            requisitionUploadStatus: currentBooking.requisitionUploadStatus,
+                            referringDoctorStatus: currentBooking.referringDoctorStatus
+                        };
+
+                        // Update the booking in Redux store
+                        const updatedBookings = bookings.map(b =>
+                            b.id === booking.id ? updatedBooking : b
+                        );
+                        dispatch(setBookings(updatedBookings));
+
+                        if (!currentBooking.requisitionUploadStatus || !currentBooking.referringDoctorStatus) {
+                            setQrBookingRef(booking.bookingReference);
+                            setShowQRCode(true);
+                            setLoadingCheckInId(null);
+                            return;
+                        }
                     }
-                }
-            } catch (error) {
-                console.error('Error checking requisition status:', error);
-                // If API call fails, use cached data as fallback
-                if (!booking.requisitionUploadStatus || !booking.referringDoctorStatus) {
+                } catch (error) {
+                    console.error('Error checking requisition status:', error);
+                    // If API call fails and we don't have the data, show error
                     setCheckInError((prev) => ({
                         ...prev,
-                        [booking.id]: 'Requisition upload status check failed'
+                        [booking.id]: 'Requisition upload status check failed. Please call the receptionist for assistance with your check-in.'
                     }));
                     setLoadingCheckInId(null);
                     return;
@@ -107,7 +144,7 @@ export default function AppointmentsPage() {
                 // Clear error if check-in succeeds
                 setCheckInError((prev) => ({ ...prev, [booking.id]: '' }));
             } catch (error) {
-                let message = 'There was an error with the check-in';
+                let message = 'There was an error with the check-in. Please call the receptionist for assistance with your check-in.';
                 if (axios.isAxiosError(error) && error.response?.data) {
                     const errorData = error.response.data;
                     // Check for nested error structure from our API route
@@ -150,7 +187,18 @@ export default function AppointmentsPage() {
     const handleCloseQRCode = () => {
         setShowQRCode(false);
         setQrBookingRef('');
+        setShowKeepAlivePopup(false);
         // Note: idle timer will automatically resume via useEffect when showQRCode changes to false
+    };
+
+    const handleKeepAliveStay = () => {
+        setShowKeepAlivePopup(false);
+        // The 2-minute interval will restart automatically via useEffect
+    };
+
+    const handleKeepAliveLeave = () => {
+        // Go back to home screen
+        router.push('/');
     };
 
     // Show QR code content if needed
@@ -162,6 +210,12 @@ export default function AppointmentsPage() {
                     bookingRef={qrBookingRef}
                     onClose={handleCloseQRCode}
                 />
+                {showKeepAlivePopup && (
+                    <QRKeepAlivePopup
+                        onStay={handleKeepAliveStay}
+                        onLeave={handleKeepAliveLeave}
+                    />
+                )}
             </div>
         );
     }

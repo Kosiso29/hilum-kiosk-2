@@ -59,13 +59,13 @@ export default function CheckinPage() {
             const response = await api.get(`slots/booking?${params}`);
 
             if (!response.data || response.data.length === 0) {
-                setErrorMessage('Sorry, we cannot find the booking reference. We can get the booking using your other personal details');
+                setErrorMessage('Sorry, we cannot find the booking reference. Please click "I don\'t have a code" to check in with your personal details');
                 setLoading(false);
                 return;
             }
 
             if (typeof response.data?.message === 'string') {
-                setErrorMessage(response.data?.message || 'Sorry, we cannot find the booking reference. We can get the booking using your other personal details');
+                setErrorMessage(response.data?.message || 'Sorry, we cannot find the booking reference. Please click "I don\'t have a code" to check in with your personal details');
                 setLoading(false);
                 return;
             }
@@ -101,11 +101,11 @@ export default function CheckinPage() {
                 }).toString();
                 router.push(`/verify-identity?${query}`);
             } else {
-                setErrorMessage('Sorry, we cannot find the booking reference. We can get the booking using your other personal details');
+                setErrorMessage('Sorry, we cannot find the booking reference. Please click "I don\'t have a code" to check in with your personal details');
             }
         } catch (error) {
             console.error('Error fetching bookings:', error);
-            setErrorMessage('Failed to fetch booking data. Please try again later.');
+            setErrorMessage('We\'re experiencing some technical difficulties. Please call the receptionist for assistance with your check-in.');
         } finally {
             setLoading(false);
         }
