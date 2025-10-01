@@ -28,6 +28,7 @@ export default function AppointmentsPage() {
     const [showQRCode, setShowQRCode] = useState(false);
     const [qrBookingRef, setQrBookingRef] = useState<string>('');
     const [showKeepAlivePopup, setShowKeepAlivePopup] = useState(false);
+    const [currentOperation, setCurrentOperation] = useState<string>('');
     const { isHelpModalOpen, openHelpModal, closeHelpModal } = useHelpModal();
 
     // Manage idle timer based on QR code dialog state
@@ -83,17 +84,25 @@ export default function AppointmentsPage() {
     const handleNext = async () => {
         if (selected.length === 0) return;
         setError(null);
-        let allSucceeded = true;
-        let lastSuccessBooking = null;
-        for (const id of selected) {
-            const booking = bookings.find((b) => b.id === id);
+
+        // First, check all selected appointments for requisition and referring doctor status
+        setCurrentOperation('Checking requisition and referring doctor status...');
+
+        // Sort selected bookings by time (earliest first)
+        const selectedBookings = selected
+            .map(id => bookings.find(b => b.id === id))
+            .filter(booking => booking !== undefined)
+            .slice() // Create a copy before sorting
+            .sort((a, b) => new Date(a!.startTimeStamp).getTime() - new Date(b!.startTimeStamp).getTime());
+
+        for (const booking of selectedBookings) {
             if (!booking) continue;
 
             setLoadingCheckInId(booking.id);
 
-            // Check if requisition and referring doctor status are already available
+            // Check if requisition and referring doctor status are available
             if (!booking.requisitionUploadStatus || !booking.referringDoctorStatus) {
-                // Missing requisition or referring doctor status - fetch from API
+                // Missing status - fetch from API to get latest data
                 try {
                     const nexusNumber = await getNexusNumberFromStorage();
                     const params = new URLSearchParams({
@@ -113,12 +122,15 @@ export default function AppointmentsPage() {
                         };
 
                         // Update the booking in Redux store
-                        const updatedBookings = bookings.map(b =>
+                        const currentBookings = bookings.slice(); // Create a copy to avoid mutation
+                        const updatedBookings = currentBookings.map(b =>
                             b.id === booking.id ? updatedBooking : b
                         );
                         dispatch(setBookings(updatedBookings));
 
+                        // If still missing, show QR code and return
                         if (!currentBooking.requisitionUploadStatus || !currentBooking.referringDoctorStatus) {
+                            setCurrentOperation('');
                             setQrBookingRef(booking.bookingReference);
                             setShowQRCode(true);
                             setLoadingCheckInId(null);
@@ -127,7 +139,7 @@ export default function AppointmentsPage() {
                     }
                 } catch (error) {
                     console.error('Error checking requisition status:', error);
-                    // If API call fails and we don't have the data, show error
+                    setCurrentOperation('');
                     setCheckInError((prev) => ({
                         ...prev,
                         [booking.id]: 'Requisition upload status check failed. Please call the receptionist for assistance with your check-in.'
@@ -136,11 +148,31 @@ export default function AppointmentsPage() {
                     return;
                 }
             }
+        }
+
+        // All requisition and referring doctor checks passed, proceed with check-ins
+        setCurrentOperation('Checking in appointments...');
+        let allSucceeded = true;
+        let lastSuccessBooking = null;
+
+        // Use the same sorted bookings for check-in process
+        for (const booking of selectedBookings) {
+            if (!booking) continue;
+
+            setLoadingCheckInId(booking.id);
 
             try {
                 // Call the new check-in API endpoint
                 await api.get(`check-in/${booking.bookingReference}`);
                 lastSuccessBooking = booking;
+
+                // Update the booking's checkedIn status to true in Redux store
+                const currentBookings = bookings.slice(); // Create a copy to avoid mutation
+                const updatedBookings = currentBookings.map(b =>
+                    b.id === booking.id ? { ...b, checkedIn: true } : b
+                );
+                dispatch(setBookings(updatedBookings));
+
                 // Clear error if check-in succeeds
                 setCheckInError((prev) => ({ ...prev, [booking.id]: '' }));
             } catch (error) {
@@ -166,16 +198,31 @@ export default function AppointmentsPage() {
             }
         }
         if (allSucceeded && lastSuccessBooking) {
-            const params = new URLSearchParams({
-                service: lastSuccessBooking.service.service,
-                start: lastSuccessBooking.startTimeStamp,
-                end: lastSuccessBooking.endTimeStamp,
-                clinic: lastSuccessBooking.room.clinic.name,
-                reference: lastSuccessBooking.bookingReference,
-                operator: lastSuccessBooking.operator?.name || '',
+            // Get all successfully checked-in bookings
+            // Since we just updated them during the check-in process, use selectedBookings directly
+            console.log('🔍 selectedBookings for success page:', selectedBookings);
+            console.log('🔍 current bookings state:', bookings.map(b => ({ id: b.id, checkedIn: b.checkedIn })));
+
+            const successfulBookings = selectedBookings.filter(booking => booking !== undefined);
+
+            // Create URL params with all successful bookings
+            const params = new URLSearchParams();
+            successfulBookings.forEach((booking, index) => {
+                if (booking) {
+                    params.append(`booking_${index}_service`, booking.service.service);
+                    params.append(`booking_${index}_start`, booking.startTimeStamp);
+                    params.append(`booking_${index}_end`, booking.endTimeStamp);
+                    params.append(`booking_${index}_clinic`, booking.room.clinic.name);
+                    params.append(`booking_${index}_reference`, booking.bookingReference);
+                    params.append(`booking_${index}_operator`, booking.operator?.name || '');
+                }
             });
+            params.append('bookingCount', successfulBookings.length.toString());
+
+            setCurrentOperation('');
             router.push(`/appointments/success?${params.toString()}`);
         } else if (!allSucceeded) {
+            setCurrentOperation('');
             setError('Some check-ins failed. Please review the errors above.');
         }
     };
@@ -234,36 +281,46 @@ export default function AppointmentsPage() {
                         Tap the <span className="text-purple-500 font-semibold">&ldquo;Check in&rdquo;</span> to select appointments
                     </div>
                     <div className="text-base text-gray-400">( Select no more than 2 items )</div>
+
+                    {/* Current Operation Status */}
+                    {currentOperation && (
+                        <div className="text-lg text-purple-600 font-medium mt-4">
+                            {currentOperation}
+                        </div>
+                    )}
                 </div>
 
                 {bookings.length > 0 && (
                     <div className="flex flex-col items-center w-full">
-                        {bookings.map((booking) => {
-                            const isSelected = selected.includes(booking.id);
+                        {bookings
+                            .slice() // Create a copy before sorting
+                            .sort((a, b) => new Date(a.startTimeStamp).getTime() - new Date(b.startTimeStamp).getTime())
+                            .map((booking) => {
+                                const isSelected = selected.includes(booking.id);
 
-                            // Extract the time portion (HH:mm) from the ISO string directly
-                            const extractTime = (isoString: string) => {
-                                // Handles both Z and offset formats
-                                const match = isoString.match(/T(\d{2}:\d{2})/);
-                                return match ? match[1] : '';
-                            };
-                            const startTime = extractTime(booking.startTimeStamp);
-                            const endTime = extractTime(booking.endTimeStamp);
+                                // Extract the time portion (HH:mm) from the ISO string directly
+                                const extractTime = (isoString: string) => {
+                                    // Handles both Z and offset formats
+                                    const match = isoString.match(/T(\d{2}:\d{2})/);
+                                    return match ? match[1] : '';
+                                };
+                                const startTime = extractTime(booking.startTimeStamp);
+                                const endTime = extractTime(booking.endTimeStamp);
 
-                            return (
-                                <AppointmentCard
-                                    key={booking.id}
-                                    service={booking.service.service}
-                                    time={`${startTime} - ${endTime}`}
-                                    disabled={loadingCheckInId !== null}
-                                    loading={loadingCheckInId === booking.id}
-                                    error={checkInError[booking.id]}
-                                    selected={isSelected}
-                                    checkedIn={booking.checkedIn}
-                                    onCheckIn={!loadingCheckInId ? () => handleSelect(booking.id, false, booking.checkedIn) : undefined}
-                                />
-                            );
-                        })}
+                                return (
+                                    <AppointmentCard
+                                        key={booking.id}
+                                        service={booking.service.service}
+                                        time={`${startTime} - ${endTime}`}
+                                        disabled={loadingCheckInId !== null}
+                                        loading={loadingCheckInId === booking.id}
+                                        error={checkInError[booking.id]}
+                                        selected={isSelected}
+                                        checkedIn={booking.checkedIn}
+                                        onCheckIn={!loadingCheckInId ? () => handleSelect(booking.id, false, booking.checkedIn) : undefined}
+                                    />
+                                );
+                            })}
                     </div>
                 )}
 

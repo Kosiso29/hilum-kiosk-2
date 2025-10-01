@@ -4,18 +4,35 @@ import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Header from "@/app/components/Header";
 
+interface BookingData {
+    service: string;
+    start: string;
+    end: string;
+    clinic: string;
+    reference: string;
+    operator: string;
+}
+
 function SuccessContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [countdown, setCountdown] = useState(15);
 
-    // Appointment details from query params
-    const service = searchParams.get("service") || "";
-    const start = searchParams.get("start") || "";
-    const end = searchParams.get("end") || "";
-    const clinic = searchParams.get("clinic") || "";
-    const reference = searchParams.get("reference") || "";
-    const operator = searchParams.get("operator") || "";
+    // Get booking count
+    const bookingCount = parseInt(searchParams.get("bookingCount") || "1");
+
+    // Get all booking details from query params
+    const bookings: BookingData[] = [];
+    for (let i = 0; i < bookingCount; i++) {
+        bookings.push({
+            service: searchParams.get(`booking_${i}_service`) || "",
+            start: searchParams.get(`booking_${i}_start`) || "",
+            end: searchParams.get(`booking_${i}_end`) || "",
+            clinic: searchParams.get(`booking_${i}_clinic`) || "",
+            reference: searchParams.get(`booking_${i}_reference`) || "",
+            operator: searchParams.get(`booking_${i}_operator`) || "",
+        });
+    }
 
     useEffect(() => {
         if (countdown === 0) {
@@ -25,10 +42,12 @@ function SuccessContent() {
         return () => clearTimeout(timer);
     }, [countdown, router]);
 
-    // Format appointment time
-    const apptTime = start && end
-        ? `${new Date(start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-        : "";
+    // Format appointment time helper function
+    const formatAppointmentTime = (start: string, end: string) => {
+        return start && end
+            ? `${new Date(start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+            : "";
+    };
 
     return (
         <div className="min-h-screen bg-white text-gray-900 flex flex-col items-center p-8">
@@ -42,22 +61,35 @@ function SuccessContent() {
                     </div>
                     <h1 className="text-5xl font-bold mb-4">You&apos;re Checked In!</h1>
                     <p className="text-2xl text-gray-400 mb-12">Please have a seat and wait to be called</p>
-                    <div className="w-full max-w-2xl bg-white rounded-2xl p-8 mb-12">
-                        <div className="text-left text-gray-500 text-2xl font-semibold mb-6">Appointment details:</div>
-                        <div className="grid grid-cols-2 gap-8 text-left text-gray-700 text-xl">
-                            <div>
-                                <div className="font-semibold mb-1">{service}</div>
-                                <div className="mb-1">{apptTime}</div>
-                                <div className="mb-1">{clinic}</div>
-                            </div>
-                            <div>
-                                <div className="mb-1">Reference Number : {reference}</div>
-                                <div className="mb-1">Operator: {operator}</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="text-xl text-purple-400 font-semibold mt-8">
+                    <div className="text-xl text-purple-400 font-semibold mt-4 mb-4">
                         Returning to home screen in {countdown} seconds...
+                    </div>
+
+                    <div className="w-full max-w-4xl space-y-6 mb-12">
+                        <div className="text-left text-gray-500 text-2xl font-semibold">
+                            {bookings.length === 1 ? 'Appointment details:' : 'Appointment details:'}
+                        </div>
+
+                        {bookings.map((booking, index) => (
+                            <div key={index} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                                {bookings.length > 1 && (
+                                    <div className="text-lg font-semibold text-purple-600 mb-4">
+                                        Appointment {index + 1}
+                                    </div>
+                                )}
+                                <div className="grid grid-cols-2 gap-6 text-left text-gray-700 text-xl">
+                                    <div>
+                                        <div className="font-semibold mb-2">{booking.service}</div>
+                                        <div className="mb-2">{formatAppointmentTime(booking.start, booking.end)}</div>
+                                        <div className="mb-2">{booking.clinic}</div>
+                                    </div>
+                                    <div>
+                                        <div className="mb-2">Reference: {booking.reference}</div>
+                                        <div className="mb-2">Operator: {booking.operator}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </main>

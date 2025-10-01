@@ -7,13 +7,13 @@ import Button from "./Button";
 interface QRKeepAlivePopupProps {
     onStay: () => void;
     onLeave: () => void;
-    timeoutDuration?: number; // in milliseconds, default 45 seconds
+    timeoutDuration?: number; // in milliseconds, default 2 minutes
 }
 
 export default function QRKeepAlivePopup({
     onStay,
     onLeave,
-    timeoutDuration = 45000
+    timeoutDuration = 120000
 }: QRKeepAlivePopupProps) {
     const [timeLeft, setTimeLeft] = useState(Math.ceil(timeoutDuration / 1000));
 
