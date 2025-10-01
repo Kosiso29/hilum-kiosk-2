@@ -71,7 +71,7 @@ export default function PersonalDetailsPage() {
             }
 
             if (!response.data || !Array.isArray(response.data) || response.data.length === 0) {
-                setError('No bookings found for the provided details.');
+                setError('No bookings found for the provided details for today.');
                 setLoading(false);
                 return;
             }
