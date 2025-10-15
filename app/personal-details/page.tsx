@@ -95,7 +95,18 @@ export default function PersonalDetailsPage() {
             router.push('/appointments');
         } catch (error: unknown) {
             console.error('Error fetching bookings:', error);
-            setError('We\'re experiencing some technical difficulties. Please call the receptionist for assistance with your check-in.');
+
+            // Check if it's a 404 error
+            if (error && typeof error === 'object' && 'response' in error) {
+                const axiosError = error as { response?: { status?: number } };
+                if (axiosError.response?.status === 404) {
+                    setError('No matching booking was found. Please check your details and make sure you entered them correctly.');
+                } else {
+                    setError('We\'re experiencing some technical difficulties. Please call the receptionist for assistance with your check-in.');
+                }
+            } else {
+                setError('We\'re experiencing some technical difficulties. Please call the receptionist for assistance with your check-in.');
+            }
         } finally {
             setLoading(false);
         }
