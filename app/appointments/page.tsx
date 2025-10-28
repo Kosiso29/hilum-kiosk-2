@@ -107,7 +107,8 @@ export default function AppointmentsPage() {
                     const nexusNumber = await getNexusNumberFromStorage();
                     const params = new URLSearchParams({
                         bookingReference: booking.bookingReference,
-                        nexusNumber
+                        nexusNumber,
+                        purpose: 'requisition_refdoc_check'
                     });
                     const response = await api.get(`slots/booking?${params}`);
 
