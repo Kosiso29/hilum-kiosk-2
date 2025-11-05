@@ -21,6 +21,8 @@ export default function PersonalDetailsPage() {
     const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>();
     const [healthcareNumber, setHealthcareNumber] = useState('');
     const [error, setError] = useState<string | null>(null);
+    const [realError, setRealError] = useState<string | null>(null);
+    const [showErrorDetails, setShowErrorDetails] = useState(false);
     const [loading, setLoading] = useState(false);
     const [showKeyboardButtons, setShowKeyboardButtons] = useState(false);
     const router = useRouter();
@@ -96,17 +98,88 @@ export default function PersonalDetailsPage() {
         } catch (error: unknown) {
             console.error('Error fetching bookings:', error);
 
-            // Check if it's a 404 error
-            if (error && typeof error === 'object' && 'response' in error) {
-                const axiosError = error as { response?: { status?: number } };
-                if (axiosError.response?.status === 404) {
-                    setError('No matching booking was found. Please check your details and make sure you entered them correctly.');
+            // Extract real error details
+            let errorDetails = '';
+            if (error && typeof error === 'object') {
+                if ('response' in error && error.response) {
+                    // Axios error with response
+                    const axiosError = error as { response?: { data?: unknown; status?: number; statusText?: string } };
+
+                    // Check if it's a 404 error
+                    if (axiosError.response?.status === 404) {
+                        setError('No matching booking was found. Please check your details and make sure you entered them correctly.');
+                        setRealError(null); // No need to show technical details for 404
+                        setShowErrorDetails(false);
+                        setLoading(false);
+                        return;
+                    }
+
+                    setError('We\'re experiencing some technical difficulties. Please call the receptionist for assistance with your check-in.');
+                    const status = axiosError.response?.status || 'Unknown';
+                    const statusText = axiosError.response?.statusText || '';
+
+                    if (axiosError.response?.data) {
+                        const data = axiosError.response.data;
+
+                        if (typeof data === 'string') {
+                            errorDetails = data;
+                        } else if (typeof data === 'object' && data !== null) {
+                            // Try to extract structured error information
+                            const dataObj = data as Record<string, unknown>;
+
+                            // Check for nested error structure: { error: { errors: [...], message: ... } }
+                            if ('error' in dataObj && typeof dataObj.error === 'object' && dataObj.error !== null) {
+                                const errorObj = dataObj.error as Record<string, unknown>;
+
+                                // Extract details from errors array if available
+                                if ('errors' in errorObj && Array.isArray(errorObj.errors)) {
+                                    const detailsList: string[] = [];
+                                    errorObj.errors.forEach((err: unknown) => {
+                                        if (typeof err === 'object' && err !== null) {
+                                            const errObj = err as Record<string, unknown>;
+                                            if ('details' in errObj && typeof errObj.details === 'string') {
+                                                detailsList.push(errObj.details);
+                                            }
+                                        }
+                                    });
+
+                                    if (detailsList.length > 0) {
+                                        errorDetails = detailsList.join('\n');
+                                    } else if ('message' in errorObj && typeof errorObj.message === 'string') {
+                                        errorDetails = errorObj.message;
+                                    }
+                                } else if ('message' in errorObj && typeof errorObj.message === 'string') {
+                                    errorDetails = errorObj.message;
+                                }
+                            } else if ('message' in dataObj && typeof dataObj.message === 'string') {
+                                // Direct message field
+                                errorDetails = dataObj.message;
+                            } else {
+                                // Fallback to status only if we can't parse the structure
+                                errorDetails = `Status: ${status} ${statusText}`;
+                            }
+                        }
+                    } else {
+                        errorDetails = `Status: ${status} ${statusText}`;
+                    }
+                } else if ('message' in error) {
+                    // Standard Error object
+                    setError('We\'re experiencing some technical difficulties. Please call the receptionist for assistance with your check-in.');
+                    errorDetails = (error as Error).message;
                 } else {
                     setError('We\'re experiencing some technical difficulties. Please call the receptionist for assistance with your check-in.');
+                    errorDetails = JSON.stringify(error, null, 2);
                 }
+            } else if (typeof error === 'string') {
+                setError('We\'re experiencing some technical difficulties. Please call the receptionist for assistance with your check-in.');
+                errorDetails = error;
             } else {
                 setError('We\'re experiencing some technical difficulties. Please call the receptionist for assistance with your check-in.');
+                errorDetails = String(error);
             }
+
+            setRealError(errorDetails);
+            setShowErrorDetails(false); // Start with details hidden
         } finally {
             setLoading(false);
         }
@@ -128,7 +201,12 @@ export default function PersonalDetailsPage() {
                                 id="first-name"
                                 placeholder="Enter first name ..."
                                 value={firstName}
-                                onChange={(e) => setFirstName(e.target.value)}
+                                onChange={(e) => {
+                                    setFirstName(e.target.value);
+                                    setError(null);
+                                    setRealError(null);
+                                    setShowErrorDetails(false);
+                                }}
                                 onFocus={handleInputFocus}
                                 onBlur={handleInputBlur}
                             />
@@ -140,7 +218,12 @@ export default function PersonalDetailsPage() {
                                 id="last-name"
                                 placeholder="Enter last name ..."
                                 value={lastName}
-                                onChange={(e) => setLastName(e.target.value)}
+                                onChange={(e) => {
+                                    setLastName(e.target.value);
+                                    setError(null);
+                                    setRealError(null);
+                                    setShowErrorDetails(false);
+                                }}
                                 onFocus={handleInputFocus}
                                 onBlur={handleInputBlur}
                             />
@@ -151,7 +234,12 @@ export default function PersonalDetailsPage() {
                             <label htmlFor="date-of-birth" className="text-xl font-semibold mb-4 block">Date-of-Birth <span className="text-purple-600">*</span></label>
                             <DatePicker
                                 date={dateOfBirth}
-                                setDate={setDateOfBirth}
+                                setDate={(date) => {
+                                    setDateOfBirth(date);
+                                    setError(null);
+                                    setRealError(null);
+                                    setShowErrorDetails(false);
+                                }}
                                 className="text-2xl"
                             />
                         </div>
@@ -162,7 +250,12 @@ export default function PersonalDetailsPage() {
                                 id="healthcare-number"
                                 placeholder="Enter healthcare number ..."
                                 value={healthcareNumber}
-                                onChange={(e) => setHealthcareNumber(e.target.value)}
+                                onChange={(e) => {
+                                    setHealthcareNumber(e.target.value);
+                                    setError(null);
+                                    setRealError(null);
+                                    setShowErrorDetails(false);
+                                }}
                                 pattern="[0-9]*"
                                 inputMode="numeric"
                                 onFocus={handleInputFocus}
@@ -184,7 +277,36 @@ export default function PersonalDetailsPage() {
                             </>
                         ) : null}
                         {error && (
-                            <div className="text-red-500 text-xl mt-2 text-center max-w-full">{error}</div>
+                            <div className="text-red-500 text-xl mt-2 text-center max-w-full">
+                                <p>{error}</p>
+                                {realError && (
+                                    <div className="mt-4 text-left">
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowErrorDetails(!showErrorDetails)}
+                                            className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 underline focus:outline-none"
+                                        >
+                                            <span>{showErrorDetails ? 'Hide' : 'Show'} error details</span>
+                                            <svg
+                                                className={`w-4 h-4 transition-transform ${showErrorDetails ? 'rotate-180' : ''}`}
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                            >
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                                            </svg>
+                                        </button>
+                                        {showErrorDetails && (
+                                            <div className="mt-2 p-4 bg-red-50 border border-red-200 rounded-lg">
+                                                <pre className="text-xs text-red-800 whitespace-pre-wrap break-words font-mono">
+                                                    {realError}
+                                                </pre>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         )}
                     </div>
                 </div>

@@ -16,6 +16,8 @@ import { getNexusNumberFromStorage } from '../lib/config';
 export default function CheckinPage() {
     const [referenceCode, setReferenceCode] = useState('');
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [realError, setRealError] = useState<string | null>(null);
+    const [showErrorDetails, setShowErrorDetails] = useState(false);
     const [loading, setLoading] = useState(false);
     const [showKeyboardButtons, setShowKeyboardButtons] = useState(false);
     const router = useRouter();
@@ -25,6 +27,8 @@ export default function CheckinPage() {
     const handleReferenceCodeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setReferenceCode(event.target.value);
         setErrorMessage(null); // Clear error message when input changes
+        setRealError(null); // Clear real error when input changes
+        setShowErrorDetails(false); // Hide error details when input changes
     };
 
     const handleInputFocus = () => {
@@ -106,6 +110,74 @@ export default function CheckinPage() {
         } catch (error) {
             console.error('Error fetching bookings:', error);
             setErrorMessage('We\'re experiencing some technical difficulties. Please call the receptionist for assistance with your check-in.');
+
+            // Extract real error details
+            let errorDetails = '';
+            if (error && typeof error === 'object') {
+                if ('response' in error && error.response) {
+                    // Axios error with response
+                    const axiosError = error as { response?: { data?: unknown; status?: number; statusText?: string } };
+                    const status = axiosError.response?.status || 'Unknown';
+                    const statusText = axiosError.response?.statusText || '';
+
+                    if (axiosError.response?.data) {
+                        const data = axiosError.response.data;
+
+                        if (typeof data === 'string') {
+                            errorDetails = data;
+                        } else if (typeof data === 'object' && data !== null) {
+                            // Try to extract structured error information
+                            const dataObj = data as Record<string, unknown>;
+
+                            // Check for nested error structure: { error: { errors: [...], message: ... } }
+                            if ('error' in dataObj && typeof dataObj.error === 'object' && dataObj.error !== null) {
+                                const errorObj = dataObj.error as Record<string, unknown>;
+
+                                // Extract details from errors array if available
+                                if ('errors' in errorObj && Array.isArray(errorObj.errors)) {
+                                    const detailsList: string[] = [];
+                                    errorObj.errors.forEach((err: unknown) => {
+                                        if (typeof err === 'object' && err !== null) {
+                                            const errObj = err as Record<string, unknown>;
+                                            if ('details' in errObj && typeof errObj.details === 'string') {
+                                                detailsList.push(errObj.details);
+                                            }
+                                        }
+                                    });
+
+                                    if (detailsList.length > 0) {
+                                        errorDetails = detailsList.join('\n');
+                                    } else if ('message' in errorObj && typeof errorObj.message === 'string') {
+                                        errorDetails = errorObj.message;
+                                    }
+                                } else if ('message' in errorObj && typeof errorObj.message === 'string') {
+                                    errorDetails = errorObj.message;
+                                }
+                            } else if ('message' in dataObj && typeof dataObj.message === 'string') {
+                                // Direct message field
+                                errorDetails = dataObj.message;
+                            } else {
+                                // Fallback to status only if we can't parse the structure
+                                errorDetails = `Status: ${status} ${statusText}`;
+                            }
+                        }
+                    } else {
+                        errorDetails = `Status: ${status} ${statusText}`;
+                    }
+                } else if ('message' in error) {
+                    // Standard Error object
+                    errorDetails = (error as Error).message;
+                } else {
+                    errorDetails = JSON.stringify(error, null, 2);
+                }
+            } else if (typeof error === 'string') {
+                errorDetails = error;
+            } else {
+                errorDetails = String(error);
+            }
+
+            setRealError(errorDetails);
+            setShowErrorDetails(false); // Start with details hidden
         } finally {
             setLoading(false);
         }
@@ -142,7 +214,38 @@ export default function CheckinPage() {
                                 onBlur={handleInputBlur}
                             />
                         </div>
-                        {errorMessage && <p className="text-red-500 text-left text-xl mt-2">{errorMessage}</p>}
+                        {errorMessage && (
+                            <div className="text-red-500 text-left text-xl mt-2">
+                                <p>{errorMessage}</p>
+                                {realError && (
+                                    <div className="mt-4">
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowErrorDetails(!showErrorDetails)}
+                                            className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 underline focus:outline-none"
+                                        >
+                                            <span>{showErrorDetails ? 'Hide' : 'Show'} error details</span>
+                                            <svg
+                                                className={`w-4 h-4 transition-transform ${showErrorDetails ? 'rotate-180' : ''}`}
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                            >
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                                            </svg>
+                                        </button>
+                                        {showErrorDetails && (
+                                            <div className="mt-2 p-4 bg-red-50 border border-red-200 rounded-lg">
+                                                <pre className="text-xs text-red-800 whitespace-pre-wrap break-words font-mono">
+                                                    {realError}
+                                                </pre>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        )}
                         <p className="text-xl text-gray-600 text-left mt-4">
                             Find the reference code in your appointment
                             <span className="font-semibold"> email</span> or <span className="font-semibold">text</span>
