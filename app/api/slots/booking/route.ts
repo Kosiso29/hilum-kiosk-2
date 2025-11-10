@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
 import { API_BASE_URL } from '@/app/lib/config';
+import { logKioskInteraction, logKioskError } from '@/app/lib/kioskLogger';
 
 export async function GET(request: NextRequest) {
     const timestamp = new Date().toISOString();
@@ -8,13 +9,25 @@ export async function GET(request: NextRequest) {
     // Extract query parameters for logging
     const { searchParams } = new URL(request.url);
     const queryParams: Record<string, string> = {};
+    searchParams.forEach((value, key) => {
+        queryParams[key] = value;
+    });
+
+    // Prepare data entered for logging
+    const dataEntered: Record<string, unknown> = {
+        timestamp,
+        searchType: queryParams.bookingReference ? 'Booking Reference' : 'Personal Details',
+        ...queryParams
+    };
 
     try {
         // Get the session token from the httpOnly cookie
         const sessionToken = request.cookies.get('session-token')?.value;
 
         if (!sessionToken) {
-            console.error('[SERVER] Booking lookup failed - no session token', {
+            logKioskError('Booking lookup failed - no session token', {
+                error: 'No session token found'
+            }, {
                 timestamp,
                 endpoint: '/api/slots/booking',
                 queryParams
@@ -25,22 +38,12 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        // Log successful request with all details
-        console.log('[SERVER] Booking lookup request received', {
-            timestamp,
-            endpoint: '/api/slots/booking',
-            queryParams,
-            hasBookingReference: !!queryParams.bookingReference,
-            hasPersonalDetails: !!(queryParams.firstName && queryParams.lastName && queryParams.patientDOB),
-            nexusNumber: queryParams.nexusNumber || 'not provided',
-            purpose: queryParams.purpose || 'not set'
-        });
-
         // Get query parameters from the request
         const queryString = searchParams.toString();
+        const fullEndpoint = `${API_BASE_URL}slots/booking?${queryString}`;
 
         // Make the API call to the external service with the session token
-        const response = await axios.get(`${API_BASE_URL}slots/booking?${queryString}`, {
+        const response = await axios.get(fullEndpoint, {
             headers: {
                 'Authorization': `Bearer ${sessionToken}`,
                 'Cookie': `token=${sessionToken}`,
@@ -48,35 +51,34 @@ export async function GET(request: NextRequest) {
             },
         });
 
-        // Log successful response
-        console.log('[SERVER] Booking lookup successful', {
-            timestamp,
-            endpoint: '/api/slots/booking',
-            queryParams,
-            bookingsReturned: Array.isArray(response.data) ? response.data.length : 0,
-            hasResults: !!response.data && (Array.isArray(response.data) ? response.data.length > 0 : true),
-            responseData: response.data
+        // Log the complete interaction
+        logKioskInteraction({
+            dataEntered,
+            endpoint: fullEndpoint,
+            requestParams: {
+                headers: {
+                    'Authorization': 'Bearer [TOKEN]',
+                    'Cookie': 'token=[TOKEN]',
+                    'Content-Type': 'application/json',
+                },
+                queryParams
+            },
+            response: response.data
         });
 
         return NextResponse.json(response.data);
     } catch (error: unknown) {
         const errorTimestamp = new Date().toISOString();
 
-        console.error('[SERVER] Booking lookup error', {
-            timestamp: errorTimestamp,
-            endpoint: '/api/slots/booking',
-            queryParams,
-            error
-        });
-
         if (error && typeof error === 'object' && 'response' in error) {
-            const axiosError = error as { response?: { status: number; data?: unknown } };
+            const axiosError = error as { response?: { status: number; data?: unknown; statusText?: string } };
 
-            console.error('[SERVER] Booking lookup API error', {
+            logKioskError('Booking lookup API error', error, {
                 timestamp: errorTimestamp,
-                endpoint: '/api/slots/booking',
+                endpoint: `${API_BASE_URL}slots/booking`,
                 queryParams,
                 httpStatus: axiosError.response?.status,
+                statusText: axiosError.response?.statusText,
                 errorData: axiosError.response?.data
             });
 
@@ -92,6 +94,12 @@ export async function GET(request: NextRequest) {
                 { status: axiosError.response?.status || 500 }
             );
         }
+
+        logKioskError('Booking lookup error', error, {
+            timestamp: errorTimestamp,
+            endpoint: '/api/slots/booking',
+            queryParams
+        });
 
         return NextResponse.json(
             { error: 'Internal server error' },

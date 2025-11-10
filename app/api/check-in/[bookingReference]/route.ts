@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
 import { API_BASE_URL } from '@/app/lib/config';
+import { logKioskInteraction, logKioskError } from '@/app/lib/kioskLogger';
 
 export async function GET(
     request: NextRequest,
@@ -13,7 +14,9 @@ export async function GET(
         const sessionToken = request.cookies.get('session-token')?.value;
 
         if (!sessionToken) {
-            console.error('[SERVER] Check-in failed - no session token', {
+            logKioskError('Check-in failed - no session token', {
+                error: 'No session token found'
+            }, {
                 timestamp,
                 endpoint: '/api/check-in'
             });
@@ -24,15 +27,17 @@ export async function GET(
         }
 
         const { bookingReference } = await params;
+        const fullEndpoint = `${API_BASE_URL}check-in/${bookingReference}`;
 
-        console.log('[SERVER] Check-in request received', {
+        // Prepare data entered for logging
+        const dataEntered = {
             timestamp,
-            endpoint: '/api/check-in',
-            bookingReference
-        });
+            bookingReference,
+            action: 'Check-in request'
+        };
 
         // Make the API call to the external service with the session token
-        const response = await axios.get(`${API_BASE_URL}check-in/${bookingReference}`, {
+        const response = await axios.get(fullEndpoint, {
             headers: {
                 'Authorization': `Bearer ${sessionToken}`,
                 'Cookie': `token=${sessionToken}`,
@@ -40,32 +45,43 @@ export async function GET(
             },
         });
 
-        console.log('[SERVER] Check-in successful', {
-            timestamp,
-            endpoint: '/api/check-in',
-            bookingReference,
-            responseData: response.data
+        // Log the complete check-in interaction with all 5 logs
+        logKioskInteraction({
+            dataEntered,
+            endpoint: fullEndpoint,
+            requestParams: {
+                headers: {
+                    'Authorization': 'Bearer [TOKEN]',
+                    'Cookie': 'token=[TOKEN]',
+                    'Content-Type': 'application/json',
+                },
+                bookingReference
+            },
+            response: response.data,
+            checkInRequest: {
+                endpoint: fullEndpoint,
+                bookingReference,
+                externalBookingReference: (response.data as { externalBooking?: { externalBookingReference?: string } })?.externalBooking?.externalBookingReference || 'N/A'
+            },
+            checkInResponse: response.data
         });
 
         return NextResponse.json(response.data);
     } catch (error: unknown) {
         const errorTimestamp = new Date().toISOString();
 
-        console.error('[SERVER] Check-in error', {
-            timestamp: errorTimestamp,
-            endpoint: '/api/check-in',
-            error
-        });
-
         if (error && typeof error === 'object' && 'response' in error) {
-            const axiosError = error as { response?: { status: number; data?: unknown } };
+            const axiosError = error as { response?: { status: number; data?: unknown; statusText?: string } };
 
-            console.error('[SERVER] Check-in API error', {
+            const { bookingReference } = await params;
+
+            logKioskError('Check-in API error', error, {
                 timestamp: errorTimestamp,
-                endpoint: '/api/check-in',
+                endpoint: `${API_BASE_URL}check-in/${bookingReference}`,
+                bookingReference,
                 httpStatus: axiosError.response?.status,
-                errorData: axiosError.response?.data,
-                error
+                statusText: axiosError.response?.statusText,
+                errorData: axiosError.response?.data
             });
 
             if (axiosError.response?.status === 401) {
@@ -92,6 +108,11 @@ export async function GET(
                 { status: statusCode }
             );
         }
+
+        logKioskError('Check-in error', error, {
+            timestamp: errorTimestamp,
+            endpoint: '/api/check-in'
+        });
 
         return NextResponse.json(
             { error: 'Internal server error' },
