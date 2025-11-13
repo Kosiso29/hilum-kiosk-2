@@ -78,17 +78,24 @@ export default function PersonalDetailsPage() {
                 return;
             }
 
-            const bookings: Booking[] = response.data;
-            const today = new Date();
-            const todaysBookings = bookings.filter(booking => {
-                const bookingDate = new Date(booking.startTimeStamp);
-                return bookingDate.getFullYear() === today.getFullYear() &&
-                    bookingDate.getMonth() === today.getMonth() &&
-                    bookingDate.getDate() === today.getDate();
-            });
+            const todaysBookings: Booking[] = response.data;
+            // TEMPORARILY DISABLED: Today's booking check
+            // const today = new Date();
+            // const todaysBookings = bookings.filter(booking => {
+            //     const bookingDate = new Date(booking.startTimeStamp);
+            //     return bookingDate.getFullYear() === today.getFullYear() &&
+            //         bookingDate.getMonth() === today.getMonth() &&
+            //         bookingDate.getDate() === today.getDate();
+            // });
+
+            // if (todaysBookings.length === 0) {
+            //     setError("We found your details, but there are no appointments scheduled for today. Kindly pick a booking scheduled for today.");
+            //     setLoading(false);
+            //     return;
+            // }
 
             if (todaysBookings.length === 0) {
-                setError("We found your details, but there are no appointments scheduled for today. Kindly pick a booking scheduled for today.");
+                setError('No matching booking was found. Please check your details and make sure you entered them correctly.');
                 setLoading(false);
                 return;
             }

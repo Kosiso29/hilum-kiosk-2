@@ -74,17 +74,24 @@ export default function CheckinPage() {
                 return;
             }
 
-            const bookings: Booking[] = response.data;
-            const today = new Date();
-            const todaysBookings = bookings.filter(booking => {
-                const bookingDate = new Date(booking.startTimeStamp);
-                return bookingDate.getFullYear() === today.getFullYear() &&
-                    bookingDate.getMonth() === today.getMonth() &&
-                    bookingDate.getDate() === today.getDate();
-            });
+            const todaysBookings: Booking[] = response.data;
+            // TEMPORARILY DISABLED: Today's booking check
+            // const today = new Date();
+            // const todaysBookings = bookings.filter(booking => {
+            //     const bookingDate = new Date(booking.startTimeStamp);
+            //     return bookingDate.getFullYear() === today.getFullYear() &&
+            //         bookingDate.getMonth() === today.getMonth() &&
+            //         bookingDate.getDate() === today.getDate();
+            // });
+
+            // if (todaysBookings.length === 0) {
+            //     setErrorMessage("We found your booking, but it is not scheduled for today. Kindly pick a booking scheduled for today.");
+            //     setLoading(false);
+            //     return;
+            // }
 
             if (todaysBookings.length === 0) {
-                setErrorMessage("We found your booking, but it is not scheduled for today. Kindly pick a booking scheduled for today.");
+                setErrorMessage("We cound't find any appointments for that booking reference");
                 setLoading(false);
                 return;
             }
