@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Booking } from '@/types/Booking';
 import Header from '@/app/components/Header';
@@ -12,6 +12,7 @@ import { useHelpModal } from '../hooks/useHelpModal';
 import { useDispatch } from 'react-redux';
 import { setBookings } from '../store/bookingSlice';
 import { getNexusNumberFromStorage } from '../lib/config';
+import { nfcService } from '../lib/nfcService';
 
 export default function CheckinPage() {
     const [referenceCode, setReferenceCode] = useState('');
@@ -20,9 +21,17 @@ export default function CheckinPage() {
     const [showErrorDetails, setShowErrorDetails] = useState(false);
     const [loading, setLoading] = useState(false);
     const [showKeyboardButtons, setShowKeyboardButtons] = useState(false);
+    const [nfcLoading, setNfcLoading] = useState(false);
+    const [nfcSupported, setNfcSupported] = useState(false);
+    const [nfcScanning, setNfcScanning] = useState(false);
     const router = useRouter();
     const dispatch = useDispatch();
     const { isHelpModalOpen, openHelpModal, closeHelpModal } = useHelpModal();
+
+    // Check NFC support on mount
+    useEffect(() => {
+        setNfcSupported(nfcService.isSupported());
+    }, []);
 
     const handleReferenceCodeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setReferenceCode(event.target.value);
@@ -190,6 +199,89 @@ export default function CheckinPage() {
         }
     };
 
+    const handleRealNfcTap = async () => {
+        setNfcScanning(true);
+        setErrorMessage(null);
+        setRealError(null);
+
+        try {
+            await nfcService.startScanning(
+                // Success callback
+                async (token: string) => {
+                    console.log('NFC token read:', token);
+                    setNfcScanning(false);
+                    nfcService.stopScanning();
+
+                    // Process the NFC check-in
+                    setNfcLoading(true);
+                    try {
+                        const nexusNumber = await getNexusNumberFromStorage();
+
+                        const response = await api.post('/mobile/checkin/nfc', {
+                            nfcToken: token.trim(),
+                            clinicNexusNumber: nexusNumber,
+                            kioskId: 1
+                        });
+
+                        if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+                            const bookings: Booking[] = response.data;
+                            dispatch(setBookings(bookings));
+
+                            const bookingReference = bookings[0].bookingReference || '';
+                            const query = new URLSearchParams({
+                                bookingReference,
+                                nfc: 'true'
+                            }).toString();
+                            // NFC check-in goes directly to appointments page, skipping verify-identity
+                            router.push(`/appointments?${query}`);
+                        } else if (response.data && typeof response.data === 'object' && 'message' in response.data) {
+                            setErrorMessage(response.data.message as string);
+                        } else {
+                            setErrorMessage('NFC check-in failed. No appointment found.');
+                        }
+                    } catch (error: any) {
+                        console.error('Error during NFC check-in:', error);
+
+                        let userMessage = 'NFC check-in failed. Please try again.';
+                        let errorDetails = '';
+
+                        if (error?.response?.data) {
+                            const data = error.response.data;
+                            if (typeof data === 'object' && data !== null) {
+                                const dataObj = data as Record<string, unknown>;
+                                if ('message' in dataObj && typeof dataObj.message === 'string') {
+                                    userMessage = dataObj.message;
+                                    errorDetails = dataObj.message;
+                                }
+                            }
+                        }
+
+                        setErrorMessage(userMessage);
+                        setRealError(errorDetails);
+                    } finally {
+                        setNfcLoading(false);
+                    }
+                },
+                // Error callback
+                (error: string) => {
+                    console.error('NFC scanning error:', error);
+                    setNfcScanning(false);
+                    setErrorMessage(error);
+                    nfcService.stopScanning();
+                }
+            );
+        } catch (error) {
+            console.error('Error starting NFC scan:', error);
+            setNfcScanning(false);
+            setErrorMessage('Failed to start NFC scanning.');
+        }
+    };
+
+    const handleCancelNfcScan = () => {
+        nfcService.stopScanning();
+        setNfcScanning(false);
+    };
+
     const handleNoCodeClick = () => {
         router.push('/personal-details');
     };
@@ -201,9 +293,73 @@ export default function CheckinPage() {
             {/* Main Content */}
             <main className="flex flex-col items-center text-center flex-grow w-full">
                 <h1 className="text-4xl font-medium mb-2">Check-In</h1>
-                <p className="text-3xl text-gray-600 mb-20">Enter booking reference code</p>
+                <p className="text-3xl text-gray-600 mb-20">Enter booking reference code or tap your phone</p>
 
                 <div className='min-w-3/5 max-w-[50rem]'>
+                    {/* NFC: Tap to Check-In */}
+                    {nfcSupported && (
+                        <div className="rounded-3xl p-12 py-16 mb-8 bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200">
+                            <div className="flex flex-col items-center justify-center gap-6">
+                                <div className="text-6xl animate-pulse">📱</div>
+                                <h2 className="text-3xl font-semibold text-blue-900">NFC Check-In</h2>
+                                <p className="text-xl text-gray-700 mb-4">
+                                    Tap your phone to instantly check in
+                                </p>
+
+                                {nfcScanning ? (
+                                    <div className="flex flex-col items-center gap-4">
+                                        <div className="relative">
+                                            <div className="w-32 h-32 border-8 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                                            <div className="absolute inset-0 flex items-center justify-center text-5xl">
+                                                📡
+                                            </div>
+                                        </div>
+                                        <p className="text-2xl font-semibold text-blue-800 animate-pulse">
+                                            Waiting for phone tap...
+                                        </p>
+                                        <p className="text-lg text-gray-600">
+                                            Hold your phone near this device
+                                        </p>
+                                        <Button
+                                            variant="secondary"
+                                            onClick={handleCancelNfcScan}
+                                            className="mt-4"
+                                        >
+                                            Cancel
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <Button
+                                        className="px-12 py-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl text-2xl font-semibold shadow-lg hover:shadow-xl transition-shadow"
+                                        onClick={handleRealNfcTap}
+                                        disabled={nfcLoading}
+                                    >
+                                        {nfcLoading ? (
+                                            <span className="flex items-center gap-3">
+                                                <svg className="animate-spin h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                                                </svg>
+                                                Processing...
+                                            </span>
+                                        ) : (
+                                            <>
+                                                <span className="text-3xl mr-3">👆</span>
+                                                Tap Phone to Check In
+                                            </>
+                                        )}
+                                    </Button>
+                                )}
+
+                                <div className="text-sm text-gray-500 mt-4 space-y-1">
+                                    <p>• Make sure NFC is enabled on your phone</p>
+                                    <p>• Open the Deebia app and enable NFC in Profile</p>
+                                    <p>• Hold your phone near this screen when prompted</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="rounded-3xl p-12 py-24 flex flex-col items-start mb-8 card-shadow">
                         <div className="flex flex-col items-start w-[65%] min-w-[20rem]">
                             <label htmlFor="reference-code" className="text-3xl font-semibold mb-6">Reference Code</label>
