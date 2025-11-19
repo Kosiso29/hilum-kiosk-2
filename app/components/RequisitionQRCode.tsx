@@ -120,6 +120,11 @@ export default function RequisitionQRCode({ bookingRef, onClose }: RequisitionQR
                     <li>2. Upload your requisition form as required</li>
                     <li>3. Return to complete your check-in process</li>
                 </ol>
+                <div className="mt-4 pt-4 border-t border-blue-200">
+                    <p className="text-sm font-semibold text-blue-900">
+                        ⏱️ Please wait at least 1 minute after scanning and uploading before trying to check in again.
+                    </p>
+                </div>
             </div>
         </div>
     );

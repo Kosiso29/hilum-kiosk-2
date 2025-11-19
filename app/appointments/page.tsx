@@ -49,15 +49,15 @@ export default function AppointmentsPage() {
         };
     }, [showQRCode]);
 
-    // Manage 2-minute keep-alive popup for QR code
+    // Manage 3-minute keep-alive popup for QR code
     useEffect(() => {
         let keepAliveInterval: NodeJS.Timeout | null = null;
 
         if (showQRCode && !showKeepAlivePopup) {
-            // Start 2-minute interval for keep-alive popup
+            // Start 3-minute interval for keep-alive popup
             keepAliveInterval = setInterval(() => {
                 setShowKeepAlivePopup(true);
-            }, 2 * 60 * 1000); // 2 minutes
+            }, 3 * 60 * 1000); // 3 minutes
         }
 
         return () => {
