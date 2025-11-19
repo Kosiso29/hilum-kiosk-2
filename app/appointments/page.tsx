@@ -27,6 +27,7 @@ export default function AppointmentsPage() {
     const [selected, setSelected] = useState<number[]>([]);
     const [showQRCode, setShowQRCode] = useState(false);
     const [qrBookingRef, setQrBookingRef] = useState<string>('');
+    const [qrServiceName, setQrServiceName] = useState<string>('');
     const [showKeepAlivePopup, setShowKeepAlivePopup] = useState(false);
     const [currentOperation, setCurrentOperation] = useState<string>('');
     const { isHelpModalOpen, openHelpModal, closeHelpModal } = useHelpModal();
@@ -133,6 +134,7 @@ export default function AppointmentsPage() {
                         if (!currentBooking.requisitionUploadStatus || !currentBooking.referringDoctorStatus) {
                             setCurrentOperation('');
                             setQrBookingRef(booking.bookingReference);
+                            setQrServiceName(booking.service.service);
                             setShowQRCode(true);
                             setLoadingCheckInId(null);
                             return;
@@ -235,6 +237,7 @@ export default function AppointmentsPage() {
     const handleCloseQRCode = () => {
         setShowQRCode(false);
         setQrBookingRef('');
+        setQrServiceName('');
         setShowKeepAlivePopup(false);
         // Note: idle timer will automatically resume via useEffect when showQRCode changes to false
     };
@@ -256,6 +259,7 @@ export default function AppointmentsPage() {
                 <Header />
                 <RequisitionQRCode
                     bookingRef={qrBookingRef}
+                    serviceName={qrServiceName}
                     onClose={handleCloseQRCode}
                 />
                 {showKeepAlivePopup && (
@@ -313,6 +317,7 @@ export default function AppointmentsPage() {
                                         key={booking.id}
                                         service={booking.service.service}
                                         time={`${startTime} - ${endTime}`}
+                                        bookingReference={booking.bookingReference}
                                         disabled={loadingCheckInId !== null}
                                         loading={loadingCheckInId === booking.id}
                                         error={checkInError[booking.id]}
