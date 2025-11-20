@@ -74,10 +74,8 @@ export default function AppointmentsPage() {
         setSelected((prev) => {
             if (prev.includes(id)) {
                 return prev.filter((x) => x !== id);
-            } else if (prev.length < 2) {
-                return [...prev, id];
             } else {
-                return prev;
+                return [...prev, id];
             }
         });
     };
@@ -290,7 +288,6 @@ export default function AppointmentsPage() {
                     <div className="text-xl text-gray-500 mb-1">
                         Tap the <span className="text-purple-500 font-semibold">&ldquo;Check in&rdquo;</span> to select appointments
                     </div>
-                    <div className="text-base text-gray-400">( Select no more than 2 items )</div>
 
                     {/* Current Operation Status */}
                     {currentOperation && (
