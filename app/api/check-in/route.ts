@@ -65,8 +65,7 @@ export async function GET(request: NextRequest) {
             },
             response: response.data,
             checkInRequest: {
-                endpoint: fullEndpoint,
-                bookingRefs
+                endpoint: fullEndpoint
             },
             checkInResponse: response.data
         });
