@@ -153,62 +153,41 @@ export default function AppointmentsPage() {
             }
         }
 
-        // All requisition and referring doctor checks passed, proceed with check-ins
+        // All requisition and referring doctor checks passed, proceed with batch check-in
         setCurrentOperation('Checking in appointments...');
-        let allSucceeded = true;
-        let lastSuccessBooking = null;
 
-        // Use the same sorted bookings for check-in process
-        for (const booking of selectedBookings) {
-            if (!booking) continue;
+        // Set all selected appointments to loading state simultaneously
+        setLoadingCheckInId(-1); // Use -1 to indicate batch loading
 
-            setLoadingCheckInId(booking.id);
+        try {
+            // Collect all booking references
+            const bookingRefs = selectedBookings
+                .filter(booking => booking !== undefined)
+                .map(booking => booking!.bookingReference)
+                .join(',');
 
-            try {
-                // Call the new check-in API endpoint
-                await api.get(`check-in/${booking.bookingReference}`);
-                lastSuccessBooking = booking;
+            // Call batch check-in API endpoint with query parameters
+            await api.get(`check-in?bookingRefs=${bookingRefs}`);
 
-                // Update the booking's checkedIn status to true in Redux store
-                const currentBookings = bookings.slice(); // Create a copy to avoid mutation
-                const updatedBookings = currentBookings.map(b =>
-                    b.id === booking.id ? { ...b, checkedIn: true } : b
-                );
-                dispatch(setBookings(updatedBookings));
+            // Update all booking statuses to checked-in in Redux store
+            const currentBookings = bookings.slice();
+            const selectedIds = selectedBookings.map(b => b!.id);
+            const updatedBookings = currentBookings.map(b =>
+                selectedIds.includes(b.id) ? { ...b, checkedIn: true } : b
+            );
+            dispatch(setBookings(updatedBookings));
 
-                // Clear error if check-in succeeds
-                setCheckInError((prev) => ({ ...prev, [booking.id]: '' }));
-            } catch (error) {
-                let message = 'There was an error with the check-in. Please call the receptionist for assistance with your check-in.';
-                if (axios.isAxiosError(error) && error.response?.data) {
-                    const errorData = error.response.data;
-                    // Check for nested error structure from our API route
-                    if (errorData.error && errorData.error.message) {
-                        message = errorData.error.message;
-                    } else if (errorData.message) {
-                        message = errorData.message;
-                    } else if (typeof errorData === 'string') {
-                        message = errorData;
-                    }
-                } else if (error instanceof Error) {
-                    message = error.message;
+            // Clear all errors for selected bookings
+            const clearedErrors: { [id: number]: string } = {};
+            selectedBookings.forEach(booking => {
+                if (booking) {
+                    clearedErrors[booking.id] = '';
                 }
-                console.log('Check-in error details:', error);
-                setCheckInError((prev) => ({ ...prev, [booking.id]: message }));
-                allSucceeded = false;
-            } finally {
-                setLoadingCheckInId(null);
-            }
-        }
-        if (allSucceeded && lastSuccessBooking) {
-            // Get all successfully checked-in bookings
-            // Since we just updated them during the check-in process, use selectedBookings directly
-            console.log('🔍 selectedBookings for success page:', selectedBookings);
-            console.log('🔍 current bookings state:', bookings.map(b => ({ id: b.id, checkedIn: b.checkedIn })));
+            });
+            setCheckInError((prev) => ({ ...prev, ...clearedErrors }));
 
+            // Navigate to success page with all bookings
             const successfulBookings = selectedBookings.filter(booking => booking !== undefined);
-
-            // Create URL params with all successful bookings
             const params = new URLSearchParams();
             successfulBookings.forEach((booking, index) => {
                 if (booking) {
@@ -223,10 +202,36 @@ export default function AppointmentsPage() {
             params.append('bookingCount', successfulBookings.length.toString());
 
             setCurrentOperation('');
+            setLoadingCheckInId(null);
             router.push(`/appointments/success?${params.toString()}`);
-        } else if (!allSucceeded) {
+        } catch (error) {
+            let message = 'There was an error with the check-in. Please call the receptionist for assistance with your check-in.';
+            if (axios.isAxiosError(error) && error.response?.data) {
+                const errorData = error.response.data;
+                // Check for nested error structure from our API route
+                if (errorData.error && errorData.error.message) {
+                    message = errorData.error.message;
+                } else if (errorData.message) {
+                    message = errorData.message;
+                } else if (typeof errorData === 'string') {
+                    message = errorData;
+                }
+            } else if (error instanceof Error) {
+                message = error.message;
+            }
+            console.log('Batch check-in error details:', error);
+
+            // Set error for all selected bookings
+            const errors: { [id: number]: string } = {};
+            selectedBookings.forEach(booking => {
+                if (booking) {
+                    errors[booking.id] = message;
+                }
+            });
+            setCheckInError((prev) => ({ ...prev, ...errors }));
             setCurrentOperation('');
-            setError('Some check-ins failed. Please review the errors above.');
+            setLoadingCheckInId(null);
+            setError('Check-in failed. Please review the errors above.');
         }
     };
 
@@ -319,7 +324,7 @@ export default function AppointmentsPage() {
                                         time={`${startTime} - ${endTime}`}
                                         bookingReference={booking.bookingReference}
                                         disabled={loadingCheckInId !== null}
-                                        loading={loadingCheckInId === booking.id}
+                                        loading={loadingCheckInId === -1 ? isSelected : loadingCheckInId === booking.id}
                                         error={checkInError[booking.id]}
                                         selected={isSelected}
                                         checkedIn={booking.checkedIn}
