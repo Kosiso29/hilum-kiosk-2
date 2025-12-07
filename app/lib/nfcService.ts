@@ -65,7 +65,7 @@ export class NFCService {
                         console.error('No records found in NFC message');
                         onError('No data found on NFC tag');
                     }
-                } catch (error) {
+                } catch (error: unknown) {
                     console.error('Error processing NFC tag:', error);
                     onError('Failed to read NFC tag data');
                 }
@@ -76,14 +76,19 @@ export class NFCService {
                 onError('Error reading NFC tag. Please try again.');
             });
 
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Error starting NFC scan:', error);
             this.isScanning = false;
 
-            if (error.name === 'NotAllowedError') {
-                onError('NFC permission denied. Please allow NFC access.');
-            } else if (error.name === 'NotSupportedError') {
-                onError('NFC is not supported on this device.');
+            if (error && typeof error === 'object' && 'name' in error) {
+                const domError = error as { name: string };
+                if (domError.name === 'NotAllowedError') {
+                    onError('NFC permission denied. Please allow NFC access.');
+                } else if (domError.name === 'NotSupportedError') {
+                    onError('NFC is not supported on this device.');
+                } else {
+                    onError('Failed to start NFC scanning. Please try again.');
+                }
             } else {
                 onError('Failed to start NFC scanning. Please try again.');
             }
@@ -113,34 +118,35 @@ export class NFCService {
 export const nfcService = new NFCService();
 
 // Type definitions for Web NFC API
+interface NDEFReadingEvent {
+    serialNumber: string;
+    message: NDEFMessage;
+}
+
+interface NDEFMessage {
+    records: NDEFRecord[];
+}
+
+interface NDEFRecord {
+    recordType: string;
+    data: ArrayBuffer;
+    encoding?: string;
+}
+
+interface NDEFReader {
+    scan(): Promise<void>;
+    addEventListener(type: 'reading', listener: (event: NDEFReadingEvent) => void): void;
+    addEventListener(type: 'readingerror', listener: () => void): void;
+}
+
 declare global {
     interface Window {
-        NDEFReader: any;
+        NDEFReader: {
+            new(): NDEFReader;
+        };
     }
 
-    interface NDEFReader {
-        scan(): Promise<void>;
-        addEventListener(type: 'reading', listener: (event: NDEFReadingEvent) => void): void;
-        addEventListener(type: 'readingerror', listener: () => void): void;
-    }
-
-    interface NDEFReadingEvent {
-        serialNumber: string;
-        message: NDEFMessage;
-    }
-
-    interface NDEFMessage {
-        records: NDEFRecord[];
-    }
-
-    interface NDEFRecord {
-        recordType: string;
-        data: ArrayBuffer;
-        encoding?: string;
-    }
-
-    var NDEFReader: {
-        prototype: NDEFReader;
+    const NDEFReader: {
         new(): NDEFReader;
     };
 }

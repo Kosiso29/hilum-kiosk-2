@@ -239,19 +239,22 @@ export default function CheckinPage() {
                         } else {
                             setErrorMessage('NFC check-in failed. No appointment found.');
                         }
-                    } catch (error: any) {
+                    } catch (error: unknown) {
                         console.error('Error during NFC check-in:', error);
 
                         let userMessage = 'NFC check-in failed. Please try again.';
                         let errorDetails = '';
 
-                        if (error?.response?.data) {
-                            const data = error.response.data;
-                            if (typeof data === 'object' && data !== null) {
-                                const dataObj = data as Record<string, unknown>;
-                                if ('message' in dataObj && typeof dataObj.message === 'string') {
-                                    userMessage = dataObj.message;
-                                    errorDetails = dataObj.message;
+                        if (error && typeof error === 'object' && 'response' in error) {
+                            const axiosError = error as { response?: { data?: unknown } };
+                            if (axiosError.response?.data) {
+                                const data = axiosError.response.data;
+                                if (typeof data === 'object' && data !== null) {
+                                    const dataObj = data as Record<string, unknown>;
+                                    if ('message' in dataObj && typeof dataObj.message === 'string') {
+                                        userMessage = dataObj.message;
+                                        errorDetails = dataObj.message;
+                                    }
                                 }
                             }
                         }
