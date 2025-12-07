@@ -8,10 +8,11 @@ import { API_BASE_URL } from "../lib/config";
 
 interface RequisitionQRCodeProps {
     bookingRef: string;
+    serviceName?: string;
     onClose: () => void;
 }
 
-export default function RequisitionQRCode({ bookingRef, onClose }: RequisitionQRCodeProps) {
+export default function RequisitionQRCode({ bookingRef, serviceName, onClose }: RequisitionQRCodeProps) {
     const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('');
     const [qrCodeError, setQrCodeError] = useState<string>('');
     const [, setIsGenerating] = useState(true);
@@ -96,9 +97,14 @@ export default function RequisitionQRCode({ bookingRef, onClose }: RequisitionQR
                         </div>
                     )}
 
-                    <div className="mb-6">
-                        <p className="text-sm text-gray-500">
-                            Booking Reference: <span className="font-semibold">{bookingRef}</span>
+                    <div className="mb-6 space-y-2">
+                        {serviceName && (
+                            <p className="text-lg text-gray-700">
+                                <span className="font-semibold">Service:</span> {serviceName}
+                            </p>
+                        )}
+                        <p className="text-lg text-gray-700">
+                            <span className="font-semibold">Booking Reference:</span> {bookingRef}
                         </p>
                     </div>
 
@@ -120,6 +126,11 @@ export default function RequisitionQRCode({ bookingRef, onClose }: RequisitionQR
                     <li>2. Upload your requisition form as required</li>
                     <li>3. Return to complete your check-in process</li>
                 </ol>
+                <div className="mt-4 pt-4 border-t border-blue-200">
+                    <p className="text-sm font-semibold text-blue-900">
+                        ⏱️ Please wait at least 1 minute after scanning and uploading before trying to check in again.
+                    </p>
+                </div>
             </div>
         </div>
     );

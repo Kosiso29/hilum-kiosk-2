@@ -3,10 +3,7 @@ import axios from 'axios';
 import { API_BASE_URL } from '@/app/lib/config';
 import { logKioskInteraction, logKioskError } from '@/app/lib/kioskLogger';
 
-export async function GET(
-    request: NextRequest,
-    { params }: { params: Promise<{ bookingReference: string }> }
-) {
+export async function GET(request: NextRequest) {
     const timestamp = new Date().toISOString();
 
     try {
@@ -26,13 +23,22 @@ export async function GET(
             );
         }
 
-        const { bookingReference } = await params;
-        const fullEndpoint = `${API_BASE_URL}check-in/${bookingReference}`;
+        // Get bookingRefs from query parameter
+        const bookingRefs = request.nextUrl.searchParams.get('bookingRefs');
+
+        if (!bookingRefs) {
+            return NextResponse.json(
+                { error: 'bookingRefs query parameter is required' },
+                { status: 400 }
+            );
+        }
+
+        const fullEndpoint = `${API_BASE_URL}check-in?bookingRefs=${bookingRefs}`;
 
         // Prepare data entered for logging
         const dataEntered = {
             timestamp,
-            bookingReference,
+            bookingRefs,
             action: 'Check-in request'
         };
 
@@ -45,7 +51,7 @@ export async function GET(
             },
         });
 
-        // Log the complete check-in interaction with all 5 logs
+        // Log the complete check-in interaction
         logKioskInteraction({
             dataEntered,
             endpoint: fullEndpoint,
@@ -55,13 +61,11 @@ export async function GET(
                     'Cookie': 'token=[TOKEN]',
                     'Content-Type': 'application/json',
                 },
-                bookingReference
+                bookingRefs
             },
             response: response.data,
             checkInRequest: {
-                endpoint: fullEndpoint,
-                bookingReference,
-                externalBookingReference: (response.data as { externalBooking?: { externalBookingReference?: string } })?.externalBooking?.externalBookingReference || 'N/A'
+                endpoint: fullEndpoint
             },
             checkInResponse: response.data
         });
@@ -73,12 +77,13 @@ export async function GET(
         if (error && typeof error === 'object' && 'response' in error) {
             const axiosError = error as { response?: { status: number; data?: unknown; statusText?: string } };
 
-            const { bookingReference } = await params;
+            const bookingRefs = request.nextUrl.searchParams.get('bookingRefs');
+            const endpoint = `${API_BASE_URL}check-in?bookingRefs=${bookingRefs}`;
 
             logKioskError('Check-in API error', error, {
                 timestamp: errorTimestamp,
-                endpoint: `${API_BASE_URL}check-in/${bookingReference}`,
-                bookingReference,
+                endpoint,
+                bookingRefs,
                 httpStatus: axiosError.response?.status,
                 statusText: axiosError.response?.statusText,
                 errorData: axiosError.response?.data

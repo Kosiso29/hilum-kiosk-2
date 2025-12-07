@@ -3,6 +3,7 @@ import React from 'react';
 interface AppointmentCardProps {
     service: string;
     time: string;
+    bookingReference?: string;
     disabled?: boolean;
     loading?: boolean;
     error?: string;
@@ -11,7 +12,7 @@ interface AppointmentCardProps {
     onCheckIn?: () => void;
 }
 
-const AppointmentCard: React.FC<AppointmentCardProps> = ({ service, time, disabled, loading, error, selected, checkedIn, onCheckIn }) => {
+const AppointmentCard: React.FC<AppointmentCardProps> = ({ service, time, bookingReference, disabled, loading, error, selected, checkedIn, onCheckIn }) => {
     // Determine why the button is disabled
     // If loadingCheckInId disables, parent will pass disabled=true but loading=false
     // We'll use a prop to indicate this, but since we don't have it, infer from props
@@ -46,6 +47,11 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({ service, time, disabl
                 <div className="flex-1 text-left">
                     <div className="text-2xl font-bold mb-1">{service}</div>
                     <div className="text-lg text-gray-500 font-medium">{time}</div>
+                    {bookingReference && (
+                        <div className="text-base text-gray-400 mt-1">
+                            Ref: <span className="font-semibold">{bookingReference}</span>
+                        </div>
+                    )}
                 </div>
                 <button
                     className={`ml-4 px-10 py-3 rounded-full border-2 text-xl font-semibold transition-all w-[13rem]
