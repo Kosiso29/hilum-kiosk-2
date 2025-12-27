@@ -24,6 +24,7 @@ export default function CheckinPage() {
     const [nfcLoading, setNfcLoading] = useState(false);
     const [nfcSupported, setNfcSupported] = useState(false);
     const [nfcScanning, setNfcScanning] = useState(false);
+    const [nfcLogs, setNfcLogs] = useState<Array<{ timestamp: string; message: string; data?: unknown }>>([]);
     const router = useRouter();
     const dispatch = useDispatch();
     const { isHelpModalOpen, openHelpModal, closeHelpModal } = useHelpModal();
@@ -32,6 +33,23 @@ export default function CheckinPage() {
     useEffect(() => {
         setNfcSupported(nfcService.isSupported());
     }, []);
+
+    // Add log entry
+    const addNfcLog = (message: string, data?: unknown) => {
+        const timestamp = new Date().toLocaleTimeString('en-US', {
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            fractionalSecondDigits: 3
+        });
+        setNfcLogs(prev => [...prev, { timestamp, message, data }]);
+    };
+
+    // Clear logs
+    const clearNfcLogs = () => {
+        setNfcLogs([]);
+    };
 
     const handleReferenceCodeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setReferenceCode(event.target.value);

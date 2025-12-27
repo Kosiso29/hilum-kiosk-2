@@ -21,76 +21,133 @@ export class NFCService {
      * Start scanning for NFC tags
      * @param onSuccess Callback when NFC tag is successfully read
      * @param onError Callback when an error occurs
+     * @param onLog Optional callback for logging debug information
      */
     async startScanning(
         onSuccess: (token: string) => void,
-        onError: (error: string) => void
+        onError: (error: string) => void,
+        onLog?: (message: string, data?: unknown) => void
     ): Promise<void> {
+        const log = (message: string, data?: unknown) => {
+            console.log(message, data || '');
+            onLog?.(message, data);
+        };
+
         if (!this.isSupported()) {
-            onError('NFC is not supported on this device or browser');
+            const errorMsg = 'NFC is not supported on this device or browser';
+            log('❌ ' + errorMsg);
+            onError(errorMsg);
             return;
         }
 
+        log('🔍 Checking NFC support...');
+        log('✅ NFC is supported');
+
         try {
+            log('📱 Creating NDEFReader instance...');
             this.reader = new NDEFReader();
             this.isScanning = true;
+            log('✅ NDEFReader created successfully');
 
             // Request permission and start scanning
+            log('🔐 Requesting NFC permission and starting scan...');
             await this.reader.scan();
 
-            console.log('NFC scanning started...');
+            log('✅ NFC scanning started successfully!');
+            log('👂 Listening for NFC tags...');
 
             // Listen for NFC tags
             this.reader.addEventListener('reading', ({ message, serialNumber }) => {
-                console.log('NFC tag detected:', serialNumber);
-                console.log('NFC message:', message);
+                log('🎉 NFC TAG DETECTED!');
+                log('📋 Serial Number:', serialNumber);
+                log('📦 Message object:', message);
+                log('📊 Number of records:', message.records?.length || 0);
 
                 try {
                     // Extract the token from the NDEF message
                     if (message.records && message.records.length > 0) {
+                        log('✅ Records found in message');
+
+                        message.records.forEach((record, index) => {
+                            log(`📄 Record ${index + 1}:`, {
+                                recordType: record.recordType,
+                                encoding: record.encoding,
+                                dataLength: record.data?.byteLength || 0
+                            });
+                        });
+
                         const firstRecord = message.records[0];
+                        log('🔍 Processing first record...');
+                        log('📝 Record type:', firstRecord.recordType);
 
                         // Check if it's a text record
                         if (firstRecord.recordType === 'text') {
-                            const textDecoder = new TextDecoder(firstRecord.encoding || 'utf-8');
+                            log('✅ Record type is TEXT');
+                            const encoding = firstRecord.encoding || 'utf-8';
+                            log('🔤 Using encoding:', encoding);
+
+                            const textDecoder = new TextDecoder(encoding);
                             const token = textDecoder.decode(firstRecord.data);
 
-                            console.log('Extracted token:', token);
+                            log('✅ Token extracted successfully!');
+                            log('🎫 Token value:', token);
+                            log('📏 Token length:', token.length);
                             onSuccess(token);
                         } else {
-                            console.error('Unsupported record type:', firstRecord.recordType);
+                            const errorMsg = `Unsupported record type: ${firstRecord.recordType}`;
+                            log('❌ ' + errorMsg);
+                            log('💡 Expected: "text", Got:', firstRecord.recordType);
                             onError('Invalid NFC tag format');
                         }
                     } else {
-                        console.error('No records found in NFC message');
+                        const errorMsg = 'No records found in NFC message';
+                        log('❌ ' + errorMsg);
+                        log('📦 Message structure:', message);
                         onError('No data found on NFC tag');
                     }
                 } catch (error: unknown) {
-                    console.error('Error processing NFC tag:', error);
+                    log('❌ Error processing NFC tag:', error);
+                    if (error instanceof Error) {
+                        log('🔍 Error name:', error.name);
+                        log('🔍 Error message:', error.message);
+                        log('🔍 Error stack:', error.stack);
+                    }
                     onError('Failed to read NFC tag data');
                 }
             });
 
             this.reader.addEventListener('readingerror', () => {
-                console.error('NFC reading error');
+                const errorMsg = 'NFC reading error occurred';
+                log('❌ ' + errorMsg);
                 onError('Error reading NFC tag. Please try again.');
             });
 
         } catch (error: unknown) {
-            console.error('Error starting NFC scan:', error);
+            log('❌ Error starting NFC scan:', error);
             this.isScanning = false;
 
             if (error && typeof error === 'object' && 'name' in error) {
-                const domError = error as { name: string };
+                const domError = error as { name: string; message?: string };
+                log('🔍 Error name:', domError.name);
+                log('🔍 Error message:', domError.message);
+
                 if (domError.name === 'NotAllowedError') {
-                    onError('NFC permission denied. Please allow NFC access.');
+                    const errorMsg = 'NFC permission denied. Please allow NFC access.';
+                    log('❌ ' + errorMsg);
+                    onError(errorMsg);
                 } else if (domError.name === 'NotSupportedError') {
-                    onError('NFC is not supported on this device.');
+                    const errorMsg = 'NFC is not supported on this device.';
+                    log('❌ ' + errorMsg);
+                    onError(errorMsg);
                 } else {
-                    onError('Failed to start NFC scanning. Please try again.');
+                    const errorMsg = 'Failed to start NFC scanning. Please try again.';
+                    log('❌ ' + errorMsg);
+                    onError(errorMsg);
                 }
             } else {
-                onError('Failed to start NFC scanning. Please try again.');
+                const errorMsg = 'Failed to start NFC scanning. Please try again.';
+                log('❌ ' + errorMsg);
+                onError(errorMsg);
             }
         }
     }
