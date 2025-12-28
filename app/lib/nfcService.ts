@@ -55,6 +55,8 @@ export class NFCService {
 
             log('✅ NFC scanning started successfully!');
             log('👂 Listening for NFC tags...');
+            log('⏰ Scanner is now waiting for tags. The "reading" event will fire when a tag is detected.');
+            log('💡 If no event fires, the scanner is running but not detecting any compatible NFC tags.');
 
             // Listen for NFC tags
             this.reader.addEventListener('reading', ({ message, serialNumber }) => {
@@ -74,11 +76,21 @@ export class NFCService {
                                 encoding: record.encoding,
                                 dataLength: record.data?.byteLength || 0
                             });
+
+                            // Log raw data bytes for debugging
+                            if (record.data) {
+                                const dataView = new Uint8Array(record.data);
+                                const hexBytes = Array.from(dataView)
+                                    .map(b => b.toString(16).padStart(2, '0'))
+                                    .join(' ');
+                                log(`🔢 Record ${index + 1} raw bytes (hex):`, hexBytes.substring(0, 100) + (hexBytes.length > 100 ? '...' : ''));
+                            }
                         });
 
                         const firstRecord = message.records[0];
                         log('🔍 Processing first record...');
                         log('📝 Record type:', firstRecord.recordType);
+                        log('📝 All record properties:', Object.keys(firstRecord));
 
                         // Check if it's a text record
                         if (firstRecord.recordType === 'text') {
@@ -97,54 +109,108 @@ export class NFCService {
                             const errorMsg = `Unsupported record type: ${firstRecord.recordType}`;
                             log('❌ ' + errorMsg);
                             log('💡 Expected: "text", Got:', firstRecord.recordType);
-                            onError('Invalid NFC tag format');
+                            log('💡 Full record type value:', JSON.stringify(firstRecord.recordType));
+                            onError(`Invalid NFC tag format. Record type: ${firstRecord.recordType}`);
                         }
                     } else {
                         const errorMsg = 'No records found in NFC message';
                         log('❌ ' + errorMsg);
                         log('📦 Message structure:', message);
+                        log('📦 Message keys:', message ? Object.keys(message) : 'null');
+                        log('📦 Message records value:', message.records);
                         onError('No data found on NFC tag');
                     }
                 } catch (error: unknown) {
                     log('❌ Error processing NFC tag:', error);
+                    log('🔍 Error type:', typeof error);
                     if (error instanceof Error) {
                         log('🔍 Error name:', error.name);
                         log('🔍 Error message:', error.message);
                         log('🔍 Error stack:', error.stack);
+                    } else if (error && typeof error === 'object') {
+                        log('🔍 Error object keys:', Object.keys(error));
+                        try {
+                            log('🔍 Error JSON:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
+                        } catch (e) {
+                            log('🔍 Could not stringify error');
+                        }
                     }
-                    onError('Failed to read NFC tag data');
+                    onError('Failed to read NFC tag data. Check logs for details.');
                 }
             });
 
-            this.reader.addEventListener('readingerror', () => {
+            this.reader.addEventListener('readingerror', (event) => {
                 const errorMsg = 'NFC reading error occurred';
                 log('❌ ' + errorMsg);
-                onError('Error reading NFC tag. Please try again.');
+                log('🔍 Reading error event:', event);
+                log('🔍 Event type:', typeof event);
+                log('🔍 Event keys:', event ? Object.keys(event) : 'null');
+
+                // Try to extract any error details from the event
+                if (event && typeof event === 'object') {
+                    const eventObj = event as any;
+                    if (eventObj.error) {
+                        log('🔍 Error object found:', eventObj.error);
+                        if (eventObj.error.name) log('🔍 Error name:', eventObj.error.name);
+                        if (eventObj.error.message) log('🔍 Error message:', eventObj.error.message);
+                    }
+                }
+
+                onError('Error reading NFC tag. Please try again. Check logs for details.');
             });
 
         } catch (error: unknown) {
             log('❌ Error starting NFC scan:', error);
+            log('🔍 Error type:', typeof error);
             this.isScanning = false;
 
-            if (error && typeof error === 'object' && 'name' in error) {
-                const domError = error as { name: string; message?: string };
-                log('🔍 Error name:', domError.name);
-                log('🔍 Error message:', domError.message);
+            if (error && typeof error === 'object') {
+                // Log all available error properties
+                log('🔍 Error object keys:', Object.keys(error));
 
-                if (domError.name === 'NotAllowedError') {
-                    const errorMsg = 'NFC permission denied. Please allow NFC access.';
-                    log('❌ ' + errorMsg);
-                    onError(errorMsg);
-                } else if (domError.name === 'NotSupportedError') {
-                    const errorMsg = 'NFC is not supported on this device.';
-                    log('❌ ' + errorMsg);
-                    onError(errorMsg);
+                if ('name' in error) {
+                    const domError = error as { name: string; message?: string; stack?: string; code?: number };
+                    log('🔍 Error name:', domError.name);
+                    log('🔍 Error message:', domError.message);
+                    log('🔍 Error stack:', domError.stack);
+                    log('🔍 Error code:', domError.code);
+
+                    // Try to stringify the full error
+                    try {
+                        log('🔍 Full error JSON:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
+                    } catch (e) {
+                        log('🔍 Could not stringify error');
+                    }
+
+                    if (domError.name === 'NotAllowedError') {
+                        const errorMsg = 'NFC permission denied. Please allow NFC access.';
+                        log('❌ ' + errorMsg);
+                        onError(errorMsg);
+                    } else if (domError.name === 'NotSupportedError') {
+                        const errorMsg = 'NFC is not supported on this device.';
+                        log('❌ ' + errorMsg);
+                        onError(errorMsg);
+                    } else if (domError.name === 'NotReadableError') {
+                        const errorMsg = `NFC hardware error: ${domError.message || 'Cannot read from NFC hardware'}`;
+                        log('❌ ' + errorMsg);
+                        onError(errorMsg);
+                    } else if (domError.name === 'InvalidStateError') {
+                        const errorMsg = `NFC state error: ${domError.message || 'Invalid NFC state'}`;
+                        log('❌ ' + errorMsg);
+                        onError(errorMsg);
+                    } else {
+                        const errorMsg = `Failed to start NFC scanning: ${domError.name} - ${domError.message || 'Unknown error'}`;
+                        log('❌ ' + errorMsg);
+                        onError(errorMsg);
+                    }
                 } else {
+                    log('🔍 Error object without name property');
                     const errorMsg = 'Failed to start NFC scanning. Please try again.';
                     log('❌ ' + errorMsg);
                     onError(errorMsg);
                 }
             } else {
+                log('🔍 Error is not an object, raw value:', String(error));
                 const errorMsg = 'Failed to start NFC scanning. Please try again.';
                 log('❌ ' + errorMsg);
                 onError(errorMsg);
