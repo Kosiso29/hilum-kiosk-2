@@ -131,7 +131,7 @@ export class NFCService {
                         log('🔍 Error object keys:', Object.keys(error));
                         try {
                             log('🔍 Error JSON:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
-                        } catch (e) {
+                        } catch {
                             log('🔍 Could not stringify error');
                         }
                     }
@@ -139,22 +139,16 @@ export class NFCService {
                 }
             });
 
-            this.reader.addEventListener('readingerror', (event) => {
+            this.reader.addEventListener('readingerror', () => {
                 const errorMsg = 'NFC reading error occurred';
                 log('❌ ' + errorMsg);
-                log('🔍 Reading error event:', event);
-                log('🔍 Event type:', typeof event);
-                log('🔍 Event keys:', event ? Object.keys(event) : 'null');
-
-                // Try to extract any error details from the event
-                if (event && typeof event === 'object') {
-                    const eventObj = event as any;
-                    if (eventObj.error) {
-                        log('🔍 Error object found:', eventObj.error);
-                        if (eventObj.error.name) log('🔍 Error name:', eventObj.error.name);
-                        if (eventObj.error.message) log('🔍 Error message:', eventObj.error.message);
-                    }
-                }
+                log('🔍 The readingerror event was triggered');
+                log('💡 This means the NFC reader detected a tag but encountered an error while reading it');
+                log('💡 Possible causes:');
+                log('   - Tag moved away during read');
+                log('   - Unsupported tag type or format');
+                log('   - Hardware communication error');
+                log('   - Tag is not NDEF-formatted');
 
                 onError('Error reading NFC tag. Please try again. Check logs for details.');
             });
@@ -178,7 +172,7 @@ export class NFCService {
                     // Try to stringify the full error
                     try {
                         log('🔍 Full error JSON:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
-                    } catch (e) {
+                    } catch {
                         log('🔍 Could not stringify error');
                     }
 
